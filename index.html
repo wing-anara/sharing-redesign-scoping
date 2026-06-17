@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Sharing Backend Redesign — Engineering Scoping</title>
+<title>Sharing, explained simply — and how we fix it</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -17,14 +17,14 @@
     --line: #232734;
     --line-soft: #1c1f2a;
     --txt: #e7e9ee;
-    --txt-dim: #a3a8b6;
+    --txt-dim: #a8adbb;
     --txt-faint: #6e7484;
     --accent: #7c8cff;
     --accent-2: #59d3a9;
     --warn: #f4b860;
     --danger: #f47174;
-    --radius: 14px;
-    --maxw: 940px;
+    --radius: 16px;
+    --maxw: 920px;
     --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   * { box-sizing: border-box; }
@@ -34,18 +34,16 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg);
     color: var(--txt);
-    line-height: 1.65;
+    line-height: 1.68;
     -webkit-font-smoothing: antialiased;
     background-image:
-      radial-gradient(900px 500px at 80% -10%, rgba(124,140,255,0.10), transparent 60%),
-      radial-gradient(700px 400px at 0% 5%, rgba(89,211,169,0.06), transparent 55%);
+      radial-gradient(900px 500px at 82% -10%, rgba(124,140,255,0.10), transparent 60%),
+      radial-gradient(700px 400px at 0% 4%, rgba(89,211,169,0.06), transparent 55%);
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
-
   .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
-  /* ---- Top bar ---- */
   header.top {
     position: sticky; top: 0; z-index: 50;
     backdrop-filter: blur(12px);
@@ -55,13 +53,12 @@
   .top-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; }
   .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 0 16px rgba(124,140,255,0.6); }
-  .top nav { display: flex; gap: 22px; font-size: 13.5px; }
+  .top nav { display: flex; gap: 20px; font-size: 13.5px; }
   .top nav a { color: var(--txt-dim); }
   .top nav a:hover { color: var(--txt); text-decoration: none; }
-  @media (max-width: 680px) { .top nav { display: none; } }
+  @media (max-width: 720px) { .top nav { display: none; } }
 
-  /* ---- Hero ---- */
-  .hero { padding: 88px 0 56px; border-bottom: 1px solid var(--line-soft); }
+  .hero { padding: 80px 0 50px; border-bottom: 1px solid var(--line-soft); }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
@@ -69,108 +66,84 @@
     border: 1px solid rgba(124,140,255,0.22); padding: 5px 12px; border-radius: 999px;
   }
   h1 {
-    font-size: clamp(32px, 5.4vw, 52px); line-height: 1.07; letter-spacing: -0.03em;
+    font-size: clamp(31px, 5.2vw, 50px); line-height: 1.08; letter-spacing: -0.03em;
     margin: 22px 0 0; font-weight: 800;
     background: linear-gradient(180deg, #fff 30%, #b8bdcc);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .hero p.lede { font-size: 18.5px; color: var(--txt-dim); max-width: 680px; margin: 20px 0 0; }
-  .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
-  .chip {
-    font-size: 12.5px; color: var(--txt-dim);
-    border: 1px solid var(--line); background: var(--panel);
-    padding: 6px 12px; border-radius: 8px;
+  .hero p.lede { font-size: 19px; color: var(--txt-dim); max-width: 660px; margin: 20px 0 0; }
+  .hero .one-liner {
+    margin-top: 26px; padding: 16px 20px; border-radius: 12px;
+    background: var(--panel); border: 1px solid var(--line);
+    font-size: 16px;
   }
-  .chip b { color: var(--txt); font-weight: 600; }
+  .hero .one-liner b { color: #fff; }
 
-  /* ---- Section scaffolding ---- */
-  section { padding: 56px 0; border-bottom: 1px solid var(--line-soft); }
+  section { padding: 54px 0; border-bottom: 1px solid var(--line-soft); }
   .kicker { font-family: var(--mono); font-size: 12.5px; color: var(--accent-2); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 10px; }
-  h2 { font-size: clamp(23px, 3.4vw, 30px); letter-spacing: -0.02em; margin: 0 0 6px; font-weight: 750; }
-  h2 + .sub { color: var(--txt-faint); margin: 0 0 26px; font-size: 15px; }
+  h2 { font-size: clamp(23px, 3.4vw, 31px); letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 750; }
+  h2 + .sub { color: var(--txt-faint); margin: 0 0 26px; font-size: 15.5px; }
   h3 { font-size: 17.5px; letter-spacing: -0.01em; margin: 0 0 8px; font-weight: 650; }
   p { margin: 0 0 16px; }
   .dim { color: var(--txt-dim); }
+  .lead-in { color: var(--txt-dim); max-width: 720px; }
+  .spacer { height: 24px; }
 
-  /* ---- Thesis callout ---- */
-  .thesis {
+  /* analogy strip */
+  .analogy { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .analogy { grid-template-columns: 1fr; } }
+  .ana-card { border-radius: var(--radius); border: 1px solid var(--line); padding: 22px 22px 18px; background: var(--panel); }
+  .ana-card .emoji { font-size: 30px; line-height: 1; }
+  .ana-card h3 { margin: 14px 0 6px; }
+  .ana-card p { font-size: 14.5px; color: var(--txt-dim); margin: 0; }
+  .ana-card.bad { border-color: rgba(244,113,116,0.28); }
+  .ana-card.good { border-color: rgba(89,211,169,0.30); }
+  .ana-card .label { font-size: 11.5px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; }
+  .ana-card.bad .label { color: var(--danger); }
+  .ana-card.good .label { color: var(--accent-2); }
+
+  .callout {
     background: linear-gradient(180deg, var(--panel-2), var(--panel));
     border: 1px solid var(--line);
     border-left: 3px solid var(--accent);
     border-radius: var(--radius);
-    padding: 26px 28px;
+    padding: 22px 24px;
   }
-  .thesis strong { color: #fff; }
+  .callout.bad { border-left-color: var(--danger); }
+  .callout.good { border-left-color: var(--accent-2); }
+  .callout strong { color: #fff; }
+  .callout p:last-child { margin-bottom: 0; }
 
-  /* ---- Cards grid ---- */
-  .grid { display: grid; gap: 16px; }
-  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 760px) { .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 20px 20px 18px;
-  }
-  .card .num { font-family: var(--mono); font-size: 12px; color: var(--txt-faint); }
-  .card h3 { margin-top: 6px; }
-  .card p { font-size: 14.5px; color: var(--txt-dim); margin-bottom: 0; }
-  .tag {
-    display: inline-block; font-size: 11.5px; font-family: var(--mono);
-    padding: 3px 8px; border-radius: 6px; margin-top: 12px;
-  }
-  .tag.read { background: rgba(89,211,169,0.10); color: var(--accent-2); border: 1px solid rgba(89,211,169,0.25); }
-  .tag.author { background: rgba(124,140,255,0.10); color: var(--accent); border: 1px solid rgba(124,140,255,0.25); }
-  .tag.legacy { background: rgba(244,113,116,0.08); color: var(--danger); border: 1px solid rgba(244,113,116,0.22); }
+  /* step-by-step "what happens" rows */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .flow .row { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed var(--line-soft); align-items: flex-start; }
+  .flow .row:last-child { border-bottom: none; }
+  .flow .ic { flex: none; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .flow .ic.bad { background: rgba(244,113,116,0.1); border: 1px solid rgba(244,113,116,0.25); }
+  .flow .ic.good { background: rgba(89,211,169,0.1); border: 1px solid rgba(89,211,169,0.25); }
+  .flow .txt { font-size: 14.5px; color: var(--txt-dim); }
+  .flow .txt b { color: var(--txt); }
 
-  /* ---- Before / After diagram ---- */
-  .ba { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: stretch; }
-  @media (max-width: 760px) { .ba { grid-template-columns: 1fr; } .ba .arrow { transform: rotate(90deg); justify-self: center; } }
-  .ba-col { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-  .ba-col.before { border-color: rgba(244,113,116,0.25); }
-  .ba-col.after { border-color: rgba(89,211,169,0.28); }
-  .ba-col h4 { margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--txt-faint); }
-  .ba-col.before h4 { color: var(--danger); }
-  .ba-col.after h4 { color: var(--accent-2); }
-  .arrow { display: flex; align-items: center; color: var(--txt-faint); font-size: 26px; }
-  .node {
-    font-family: var(--mono); font-size: 12.5px; background: var(--bg-soft);
-    border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; margin-bottom: 8px;
+  /* issue cards */
+  .issues { display: grid; gap: 16px; }
+  .issue {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--panel); overflow: hidden;
   }
-  .node small { display: block; font-family: 'Inter'; color: var(--txt-faint); font-size: 11.5px; margin-top: 3px; }
-  .node.bad { border-color: rgba(244,113,116,0.3); }
-  .node.good { border-color: rgba(89,211,169,0.3); }
-  .fanout { color: var(--danger); font-size: 12px; font-family: var(--mono); margin-top: 6px; }
-  .oneline { color: var(--accent-2); font-size: 12px; font-family: var(--mono); margin-top: 6px; }
+  .issue .head { padding: 18px 22px 14px; }
+  .issue .qn { font-family: var(--mono); font-size: 12px; color: var(--warn); }
+  .issue h3 { margin: 6px 0 0; }
+  .issue .body { display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 720px) { .issue .body { grid-template-columns: 1fr; } }
+  .issue .cell { padding: 16px 22px 20px; font-size: 14.5px; color: var(--txt-dim); }
+  .issue .cell.snag { border-top: 1px solid var(--line-soft); }
+  .issue .cell.plan { border-top: 1px solid var(--line-soft); background: rgba(124,140,255,0.035); }
+  @media (min-width: 721px) { .issue .cell.plan { border-left: 1px solid var(--line-soft); } }
+  .issue .cell .lbl { display: block; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .issue .cell.snag .lbl { color: var(--danger); }
+  .issue .cell.plan .lbl { color: var(--accent); }
 
-  /* ---- Code block ---- */
-  pre {
-    background: #0d0f16; border: 1px solid var(--line); border-radius: 12px;
-    padding: 18px 20px; overflow-x: auto; font-family: var(--mono);
-    font-size: 13px; line-height: 1.7; color: #cfd3df; margin: 0 0 16px;
-  }
-  pre .c { color: var(--txt-faint); }
-  pre .k { color: var(--accent); }
-  pre .g { color: var(--accent-2); }
-  pre .r { color: var(--danger); }
-
-  /* ---- Tables ---- */
-  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
-  th { background: var(--panel-2); color: var(--txt-dim); font-weight: 600; font-size: 12.5px; letter-spacing: 0.02em; text-transform: uppercase; }
-  td { color: var(--txt-dim); }
-  td:first-child { color: var(--txt); font-weight: 500; }
-  tr:last-child td { border-bottom: none; }
-  td code, p code, li code {
-    font-family: var(--mono); font-size: 12.5px; background: var(--bg-soft);
-    border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; color: #c8cdf0;
-  }
-  .pill { font-size: 11px; font-family: var(--mono); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
-  .pill.keep { background: rgba(89,211,169,0.1); color: var(--accent-2); }
-  .pill.new { background: rgba(124,140,255,0.1); color: var(--accent); }
-  .pill.drop { background: rgba(244,113,116,0.1); color: var(--danger); }
-
-  /* ---- Timeline / issues ---- */
+  /* build journey */
   ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; }
   ol.steps li {
     counter-increment: s; position: relative; padding: 16px 0 16px 56px;
@@ -186,53 +159,51 @@
   }
   ol.steps li b { color: var(--txt); }
   ol.steps li span { color: var(--txt-dim); font-size: 14.5px; }
+  .phase-tag { font-size: 10.5px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 5px; margin-left: 8px; vertical-align: middle; }
+  .phase-tag.quiet { background: rgba(124,140,255,0.1); color: var(--accent); }
+  .phase-tag.switch { background: rgba(89,211,169,0.1); color: var(--accent-2); }
+  .phase-tag.clean { background: rgba(244,113,116,0.1); color: var(--danger); }
 
-  ul.q { list-style: none; padding: 0; margin: 0; }
-  ul.q li { padding: 14px 0 14px 26px; position: relative; border-bottom: 1px solid var(--line-soft); color: var(--txt-dim); }
-  ul.q li:last-child { border-bottom: none; }
-  ul.q li::before { content: "?"; position: absolute; left: 0; top: 13px; font-family: var(--mono); color: var(--warn); font-weight: 600; }
-  ul.q li b { color: var(--txt); font-weight: 600; }
-
-  /* ---- Note banner ---- */
   .note {
     display: flex; gap: 12px; align-items: flex-start;
     background: rgba(244,184,96,0.06); border: 1px solid rgba(244,184,96,0.22);
-    border-radius: 12px; padding: 14px 16px; font-size: 13.5px; color: var(--txt-dim);
+    border-radius: 12px; padding: 14px 16px; font-size: 14px; color: var(--txt-dim);
   }
   .note .ic { color: var(--warn); font-weight: 700; }
 
-  footer { padding: 44px 0 72px; color: var(--txt-faint); font-size: 13px; }
-  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; align-items: center; }
+  .tldr { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  @media (max-width: 720px) { .tldr { grid-template-columns: 1fr; } }
+  .tldr .b { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .tldr .b .big { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .tldr .b .big.g { color: var(--accent-2); }
+  .tldr .b .big.r { color: var(--danger); }
+  .tldr .b p { font-size: 13.5px; color: var(--txt-dim); margin: 6px 0 0; }
 
-  .lead-in { color: var(--txt-dim); max-width: 720px; }
-  .spacer-sm { height: 22px; }
+  footer { padding: 42px 0 70px; color: var(--txt-faint); font-size: 13px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; align-items: center; }
 </style>
 </head>
 <body>
 
 <header class="top">
   <div class="wrap top-inner">
-    <div class="brand"><span class="dot"></span> Spaces · Sharing Redesign</div>
+    <div class="brand"><span class="dot"></span> Sharing, made simple</div>
     <nav>
       <a href="#today">Today</a>
-      <a href="#thesis">Thesis</a>
-      <a href="#model">Model</a>
-      <a href="#migration">Migration</a>
-      <a href="#issues">Issues</a>
+      <a href="#want">What we want</a>
+      <a href="#issues">The snags</a>
+      <a href="#build">The plan</a>
     </nav>
   </div>
 </header>
 
 <div class="hero">
   <div class="wrap">
-    <span class="eyebrow">Engineering Scoping · Proposal</span>
-    <h1>Collapsing three sharing<br/>models into one Space</h1>
-    <p class="lede">A redesign of how permissions and sharing are stored and checked — replacing a denormalized per-item permission mirror with a single membership join at the Space boundary.</p>
-    <div class="meta-row">
-      <span class="chip"><b>Status</b> &nbsp;Scoping / proposal</span>
-      <span class="chip"><b>Surface</b> &nbsp;Permissions backend</span>
-      <span class="chip"><b>Outcome</b> &nbsp;One model, two roles</span>
-      <span class="chip">Sanitized public write-up</span>
+    <span class="eyebrow">Explained simply</span>
+    <h1>Sharing is a pile of<br/>sticky notes. Let's<br/>make it rooms.</h1>
+    <p class="lede">A plain-English look at why sharing is slow and fragile today, what we want instead, the tricky bits we have to decide, and the steps to get there safely.</p>
+    <div class="one-liner">
+      <b>One sentence:</b> &nbsp;today we label every single file with "who's allowed." We want to put files in <b>rooms</b> and just keep a <b>guest list</b> for each room.
     </div>
   </div>
 </div>
@@ -242,218 +213,157 @@
 <!-- TODAY -->
 <section id="today">
   <div class="wrap">
-    <p class="kicker">01 — Current state</p>
-    <h2>One runtime model, fed by three authoring models</h2>
-    <p class="sub">The "three parallel systems" framing is right — but the engineering reality is sharper.</p>
+    <p class="kicker">01 — How it works today</p>
+    <h2>We put a sticky note on everything</h2>
+    <p class="sub">And that's exactly why it's slow and breaks.</p>
 
-    <p class="lead-in">Items and folders are the <strong>same record type</strong>, arranged in a tree by a parent pointer (a folder is just a record that holds children). Access is not computed from share records at read time. Instead, a <strong>denormalized permission table mirrors one row per item, per user</strong> — and that mirror is what every read actually consults. The three "models" below are really three different ways of <em>authoring</em> rows into that one mirror.</p>
+    <p class="lead-in">Picture your files as <b>boxes inside boxes inside boxes</b> — a folder holds folders, which hold files. When you share the top box with a coworker, the app doesn't just remember "this box is shared." It opens <b>every box and every file inside</b>, all the way down, and sticks a note on each one that says <i>"Sam is allowed here."</i></p>
 
-    <div class="grid cols-3" style="margin-top: 26px;">
-      <div class="card">
-        <div class="num">model 01</div>
-        <h3>Folder shares</h3>
-        <p>Explicit folder&nbsp;→&nbsp;person invites by email, with an accept / decline lifecycle, plus one shareable invite-link token per folder.</p>
-        <span class="tag author">authoring</span>
-      </div>
-      <div class="card">
-        <div class="num">model 02</div>
-        <h3>Item permission mirror</h3>
-        <p>The real source of truth at read time: a row per <em>(workspace, item, user)</em> with a role, plus a special "everyone" sentinel row for workspace-wide visibility.</p>
-        <span class="tag read">runtime truth</span>
-      </div>
-      <div class="card">
-        <div class="num">model 03</div>
-        <h3>Team folders</h3>
-        <p>A folder flagged non-private becomes visible to the whole workspace — a third path that writes the "everyone" sentinel into the same mirror.</p>
-        <span class="tag author">authoring</span>
-      </div>
+    <div class="spacer"></div>
+    <div class="flow">
+      <div class="row"><div class="ic bad">📌</div><div class="txt"><b>Share a folder with 10,000 things inside</b> → the app writes 10,000 sticky notes, one per item.</div></div>
+      <div class="row"><div class="ic bad">➕</div><div class="txt"><b>Add a second coworker</b> → another 10,000 notes.</div></div>
+      <div class="row"><div class="ic bad">🔁</div><div class="txt"><b>Change your mind and make it private</b> → peel every note back off and redo them all.</div></div>
+      <div class="row"><div class="ic bad">🤖</div><div class="txt"><b>There's a cleanup robot</b> whose only job is to fix notes that fell out of sync. The fact it needs to exist is the tell that this is fragile.</div></div>
     </div>
 
-    <div class="spacer-sm"></div>
-
-    <div class="thesis" style="border-left-color: var(--danger);">
-      <p style="margin:0;"><strong>The load-bearing problem.</strong> Because the mirror stores one row per descendant, <strong>every membership or visibility change fans out a tree walk that rewrites a row for every item underneath</strong>. Add one member to a folder with 10,000 descendants → 10,000 writes. Flip a folder's visibility → delete-and-reinsert the entire subtree. Creating an item walks up its ancestors to copy down inherited rows. A dedicated backfill job exists <em>solely</em> to keep this mirror consistent — which is itself the tell that the model is fragile.</p>
-    </div>
-
-    <div class="spacer-sm"></div>
-    <div class="note">
-      <span class="ic">⚠</span>
-      <div>The read check <em>also</em> walks ancestors when the direct row misses, and the client re-derives the same rules a second time for UI gating — two implementations of one ruleset that can quietly drift.</div>
+    <div class="spacer"></div>
+    <div class="callout bad">
+      <p style="margin:0 0 10px;"><strong>And it's not one sticky-note machine — it's three.</strong> Three different features all scribble onto the same items in slightly different ways:</p>
+      <p style="margin:0;" class="dim">1) "invite this person to this folder" &nbsp;·&nbsp; 2) the sticky notes themselves (what the app actually reads to decide access) &nbsp;·&nbsp; 3) "make this folder visible to everyone at the company." Three overlapping systems = confusing, easy to get wrong, and double the code to keep in sync.</p>
     </div>
   </div>
 </section>
 
-<!-- THESIS -->
-<section id="thesis">
+<!-- WHAT WE WANT -->
+<section id="want">
   <div class="wrap">
-    <p class="kicker">02 — The thesis</p>
-    <h2>Make access a membership join, not a mirror</h2>
-    <p class="sub">The redesign isn't "add a Space table." It's changing what a permission check reads.</p>
+    <p class="kicker">02 — What we want instead</p>
+    <h2>Rooms with a guest list</h2>
+    <p class="sub">One simple idea replaces all three sticky-note machines.</p>
 
-    <div class="ba">
-      <div class="ba-col before">
-        <h4>Today — per-item mirror</h4>
-        <div class="node bad">folder<small>flip visibility →</small></div>
-        <div class="node bad">child · child · child …<small>rewrite a row for every descendant</small></div>
-        <div class="node bad">grand-children …<small>and theirs, recursively</small></div>
-        <div class="fanout">membership change = O(subtree) writes</div>
-        <div class="fanout">read = walk ancestors until a row hits</div>
+    <div class="analogy">
+      <div class="ana-card bad">
+        <div class="emoji">📌🗄️</div>
+        <span class="label">Today</span>
+        <h3>A note on every object</h3>
+        <p>To let a friend into your house you copy a permission slip onto every book, spoon, and sock. Change the guest list → re-label everything.</p>
       </div>
-      <div class="arrow">→</div>
-      <div class="ba-col after">
-        <h4>Proposed — membership join</h4>
-        <div class="node good">item<small>belongs to exactly one Space</small></div>
-        <div class="node good">Space ⇢ members<small>one membership list per Space</small></div>
-        <div class="node good">check = is caller a member?<small>single indexed lookup</small></div>
-        <div class="oneline">membership change = 1 write</div>
-        <div class="oneline">read = one join, no ancestor walk</div>
+      <div class="ana-card good">
+        <div class="emoji">🚪🗝️</div>
+        <span class="label">The plan</span>
+        <h3>A key to the room</h3>
+        <p>Put your stuff in a room. Keep a guest list on the door. To share, add a name to the list — the stuff inside never gets touched.</p>
       </div>
     </div>
 
-    <div class="spacer-sm"></div>
-    <div class="thesis">
-      <p style="margin:0 0 12px;"><strong>The move:</strong> introduce a <strong>Space</strong> as the single permission boundary. An item belongs to exactly one Space; access is <em>item → Space → "is the caller a member?"</em></p>
-      <p style="margin:0;" class="dim">Because the design already mandates single-membership ("a file lives in exactly one Space; assigning it is a <em>move</em>"), this is clean. Membership edits — the common case — touch <strong>zero items</strong>. The only operation that still rewrites a subtree is a <em>move</em>, and that's a single indexed-column update per item, not a permission-row explosion. Roles collapse from three to two: <strong>Owner</strong> and <strong>Member</strong>.</p>
+    <div class="spacer"></div>
+    <p class="lead-in">We call a room a <b>Space</b>. Here's the whole model:</p>
+    <div class="flow">
+      <div class="row"><div class="ic good">🚪</div><div class="txt"><b>A Space is a room.</b> Your files live inside it.</div></div>
+      <div class="row"><div class="ic good">📝</div><div class="txt"><b>Each room has a guest list.</b> You're either the <b>Owner</b> (you run the room — rename it, manage the list) or a <b>Member</b> (you can use everything inside).</div></div>
+      <div class="row"><div class="ic good">🔑</div><div class="txt"><b>To share, add a name to the list.</b> That's one entry. None of the files inside change at all.</div></div>
+      <div class="row"><div class="ic good">🙂</div><div class="txt"><b>"Private" is just a room with one person in it.</b> "Shared" is a room with more. Same thing, no special mode.</div></div>
+      <div class="row"><div class="ic good">⚡</div><div class="txt"><b>Checking access is one quick look:</b> "what room is this file in, and is this person on that room's list?"</div></div>
+      <div class="row"><div class="ic good">📦</div><div class="txt"><b>A file lives in exactly one room.</b> Putting it in another room is a real <b>move</b> — and we'll warn you it becomes visible to that room's people.</div></div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="tldr">
+      <div class="b"><div class="big r">10,000 → 1</div><p>Adding someone goes from thousands of writes to a single guest-list entry.</p></div>
+      <div class="b"><div class="big g">3 → 1</div><p>Three overlapping sharing systems become one.</p></div>
+      <div class="b"><div class="big g">3 → 2</div><p>Roles simplify to just Owner and Member.</p></div>
     </div>
   </div>
 </section>
 
-<!-- MODEL -->
-<section id="model">
-  <div class="wrap">
-    <p class="kicker">03 — Proposed data model</p>
-    <h2>One container, one membership list, one check</h2>
-    <p class="sub">The workspace/org stays as the billing + seats wrapper; Spaces live inside it.</p>
-
-    <div class="grid cols-2">
-      <div class="card">
-        <h3>Space</h3>
-        <p>The top-level content container. Carries name, icon, a "default / personal" flag (one per user, archive-not-delete), and a "discoverable" flag for open-to-workspace joining.</p>
-      </div>
-      <div class="card">
-        <h3>Space membership</h3>
-        <p>One row per <em>(Space, user)</em> with role <code>OWNER</code> or <code>MEMBER</code>. This single list replaces the entire per-item mirror.</p>
-      </div>
-      <div class="card">
-        <h3>Space invite + invite link</h3>
-        <p>Pending email invites with accept / decline, and a token link for outside recipients — both re-pointed from folder-level to Space-level.</p>
-      </div>
-      <div class="card">
-        <h3>Item → Space pointer</h3>
-        <p>Each item record gains a <code>spaceId</code>. Denormalized so reads are a single lookup; a move rewrites the pointer down the subtree.</p>
-      </div>
-    </div>
-
-    <div class="spacer-sm"></div>
-    <h3>The new access check</h3>
-    <p class="dim">The ancestor walk, the "everyone" sentinel, and the per-item mirror all disappear behind one join:</p>
-    <pre><span class="c">// replaces the recursive ancestor walk + mirror lookup</span>
-<span class="k">function</span> access(item, user) {
-  <span class="k">const</span> role = membership(item.<span class="g">spaceId</span>, user.id)   <span class="c">// one indexed join</span>
-  <span class="k">if</span> (role === <span class="g">'OWNER'</span>)  <span class="k">return</span> read + write + manage
-  <span class="k">if</span> (role === <span class="g">'MEMBER'</span>) <span class="k">return</span> read + write
-  <span class="k">if</span> (space.discoverable) <span class="k">return</span> joinable    <span class="c">// open-to-workspace</span>
-  <span class="k">return</span> <span class="r">forbidden</span>
-}</pre>
-    <div class="note">
-      <span class="ic">★</span>
-      <div>Compliance-gated workspaces, sharing seat limits, and inviter-authority re-validation are <strong>load-bearing and preserved</strong> — re-implemented at the Space level rather than dropped.</div>
-    </div>
-  </div>
-</section>
-
-<!-- MIGRATION -->
-<section id="migration">
-  <div class="wrap">
-    <p class="kicker">04 — Migration</p>
-    <h2>Each existing model maps deterministically</h2>
-    <p class="sub">Runs as a versioned, idempotent backfill with a dry-run that reports any access-widening.</p>
-
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Today</th><th>Becomes</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td>Private / owner-only items</td><td>The owner's <b>default Space</b></td><td>A one-member Space is simply "private."</td></tr>
-          <tr><td>Team folders (workspace-visible)</td><td>A <b>workspace-wide Space</b></td><td>Discoverable; all workspace members join.</td></tr>
-          <tr><td>Shared folders</td><td>A <b>new Space per top-level shared folder</b></td><td>Accepted recipients become members.</td></tr>
-          <tr><td>Three roles</td><td><b>Two roles</b></td><td>Owner→Owner, full-access→Member, viewer→Member. <span style="color:var(--warn)">Viewers gain write — flag &amp; confirm.</span></td></tr>
-          <tr><td>Pending invites &amp; link tokens</td><td>Space invites &amp; Space link tokens</td><td>Existing tokens must keep resolving.</td></tr>
-          <tr><td>Legacy public chat-share link</td><td>Left read-only through deprecation</td><td>Superseded by query-param share URLs; no data move.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="spacer-sm"></div>
-    <div class="note">
-      <span class="ic">⚠</span>
-      <div><b>Sharpest edge — nested shares.</b> A sub-folder can today carry a share distinct from its parent. Single-Space membership can't represent "parent shared with A, child also with B." The likely rule: child shares collapse into the nearest ancestor Space, and any extra members are added there — a conscious widening that the dry-run surfaces for review.</div>
-    </div>
-  </div>
-</section>
-
-<!-- SURFACES -->
-<section id="surfaces">
-  <div class="wrap">
-    <p class="kicker">05 — Surface mapping</p>
-    <h2>What each surface maps to</h2>
-    <p class="sub">Preserved, rebuilt, or consciously dropped.</p>
-
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Surface today</th><th>New</th><th></th></tr></thead>
-        <tbody>
-          <tr><td>Share folder (invite by email + role)</td><td>Invite to Space</td><td><span class="pill new">rebuild</span></td></tr>
-          <tr><td>Update / remove a share</td><td>Space member role &amp; removal</td><td><span class="pill keep">O(1) now</span></td></tr>
-          <tr><td>Sharing mode toggle (private/team/invite)</td><td>Space membership + discoverable flag</td><td><span class="pill new">rebuild</span></td></tr>
-          <tr><td>Generate / accept invite link</td><td>Space invite link</td><td><span class="pill keep">preserved</span></td></tr>
-          <tr><td>Share modal + its tab components</td><td>Space members panel</td><td><span class="pill drop">retired</span></td></tr>
-          <tr><td>Sidebar Private / Team / Shared buckets</td><td>Space-grouped sidebar</td><td><span class="pill new">rebuild</span></td></tr>
-          <tr><td>Legacy public chat share + route</td><td>Deprecated, read-only</td><td><span class="pill drop">sunset</span></td></tr>
-          <tr><td>Compliance gating · seat limits · role checks</td><td>Same rules at Space level</td><td><span class="pill keep">preserved</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- ISSUES -->
+<!-- THE SNAGS / ISSUES -->
 <section id="issues">
   <div class="wrap">
-    <p class="kicker">06 — Breakdown</p>
-    <h2>Buildable issues</h2>
-    <p class="sub">Sequenced so the new path lands dark behind a dual-read before anything is cut over.</p>
+    <p class="kicker">03 — The snags</p>
+    <h2>The tricky bits we have to decide</h2>
+    <p class="sub">Switching to rooms is clean — except for these. Each one needs a call before we build.</p>
 
-    <ol class="steps">
-      <li><b>Schema + Space entity.</b> <span>Space, membership, invite, invite-link tables; add the item → Space pointer. No behavior change.</span></li>
-      <li><b>Space-resolving access check.</b> <span>New resolver behind the existing check signature, dual-reading the old mirror as fallback. Keeps all call sites stable.</span></li>
-      <li><b>Default Space at signup.</b> <span>Create a default Space alongside the workspace that's already created per user.</span></li>
-      <li><b>Space CRUD + membership API.</b> <span>Create / rename / archive / invite / remove / role-change, porting compliance, seat-limit, and role-rank guards.</span></li>
-      <li><b>Invite link + redemption.</b> <span>Space link tokens and the workspace-join-then-Space-join path.</span></li>
-      <li><b>Backfill migration.</b> <span>Versioned, idempotent, dry-run with access-widening report; maps the three models and backfills the item pointer.</span></li>
-      <li><b>Move semantics.</b> <span>Assigning an item to a Space = subtree pointer rewrite + a "becomes visible to N members" confirmation.</span></li>
-      <li><b>Sidebar + Library reshape.</b> <span>Space-grouped sidebar; flat Library with a Space filter/column; retire the bucketing logic.</span></li>
-      <li><b>Client permission unification.</b> <span>Replace the duplicated client-side rules with one membership-driven capability source.</span></li>
-      <li><b>Retire the mirror.</b> <span>Once dual-read is proven, drop the per-item mirror, its backfill job, and the old share UI.</span></li>
-      <li><b>Legacy share sunset.</b> <span>Keep the old public chat link read-only, add usage telemetry, set a removal date.</span></li>
-    </ol>
+    <div class="issues">
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 01</span><h3>A folder shared two different ways at once</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Today you can share a big folder with Anna, and <i>separately</i> share one folder inside it with Bob. But a thing can only be in <b>one room</b>. So where does Bob go?</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Put Bob on the big room's guest list too. He can now see a bit more than before, so we'd <b>flag every case like this</b> in a preview report and let a human approve it.</div>
+        </div>
+      </div>
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 02</span><h3>"Look but don't touch" disappears</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Today some people are view-only. The new model only has Owner and Member — and Members can edit. So view-only people would gain editing power.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Decide with the team: either accept that view-only becomes can-edit, or keep a temporary read-only flag for the workspaces that truly rely on it. <b>Needs a product call.</b></div>
+        </div>
+      </div>
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 03</span><h3>"Everyone at the company can see this"</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Today a folder can be visible to the whole company automatically. Rooms are opt-in by guest list, so what happens to "everyone"?</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Make one <b>company-wide room</b> that everyone is automatically on, OR drop auto-visibility and make people pick rooms on purpose. Leaning toward a company-wide room.</div>
+        </div>
+      </div>
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 04</span><h3>Moving stuff between rooms</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>If we stamp the room name onto every file (so reads are fast), then <i>moving</i> a folder to a new room means re-stamping everything inside it — the old subtree problem, but smaller.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Accept it. Moves are rare; sharing happens constantly. Fast reads + the occasional move re-stamp is a much better trade than today's constant re-stamping.</div>
+        </div>
+      </div>
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 05</span><h3>Not breaking anything during the switch</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>We can't flip a switch overnight on live data and hope. If the new system is wrong, people lose access to their stuff.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Run both systems side by side for a while. The new one answers, the old one is a safety net. Only delete the old one once the new one has proven it gives the same answers.</div>
+        </div>
+      </div>
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 06</span><h3>Keeping the strict-compliance rules</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Some workspaces have strict rules about who can be shared with and how. Those rules are load-bearing — dropping them would be a real problem.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span><b>Keep every one of them</b>, just re-applied at the room level instead of the folder level. Same limits, same checks, new home.</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 
-<!-- OPEN Q -->
-<section id="questions">
+<!-- THE PLAN -->
+<section id="build">
   <div class="wrap">
-    <p class="kicker">07 — Open questions</p>
-    <h2>To resolve before building</h2>
-    <p class="sub">The decisions that change the shape of the work.</p>
+    <p class="kicker">04 — What we need to do</p>
+    <h2>The plan to make it work</h2>
+    <p class="sub">Build the new thing quietly next to the old thing, copy everyone over, prove it matches, then turn the old thing off.</p>
 
-    <ul class="q">
-      <li><b>Nested shared folders</b> — collapse into the ancestor Space, or allow sub-Spaces? Single-membership forbids overlapping shares, so we need the rule.</li>
-      <li><b>Dropping the viewer role</b> — migrate viewers to Member (they gain write), or keep a transitional read-only flag for workspaces that rely on it?</li>
-      <li><b>Team folders</b> — one workspace-wide discoverable Space per org, or drop org-wide visibility and make everything an explicit Space?</li>
-      <li><b>Denormalize the pointer vs. resolve-via-root</b> — accept the per-item pointer (fast reads, subtree rewrite on move)? Recommended: yes, denormalize.</li>
-      <li><b>Dual-read window</b> — how long do we keep the old mirror alive as a fallback before deleting it?</li>
-      <li><b>Chats</b> — confirmed exempt from Spaces in the current design; verify they carry no Space pointer at all.</li>
-    </ul>
+    <ol class="steps">
+      <li><b>Create the "rooms" and "guest lists."</b><span> Add the new room, membership, and invite records. Nothing changes for users yet.</span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Teach the app to check the guest list.</b><span> Add the new "is this person in the room?" check, but keep reading the old sticky notes as a backup. </span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Give everyone a starter room.</b><span> Each person gets a default personal room the moment their account is created.</span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Build the room controls.</b><span> Create / rename / archive a room, invite people, change roles — carrying over the compliance and limit rules.</span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Make invite links work for rooms.</b><span> Share-by-link, including the "join the company, then join the room" path for outsiders.</span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Copy everyone into rooms (the big migration).</b><span> A careful, repeatable job that turns today's private / team / shared folders into rooms with the right guest lists. Runs as a preview first so we can eyeball anything that changes.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Make "assign to a room" a proper move.</b><span> With a clear "this becomes visible to N people" confirmation.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Reshape the sidebar and library around rooms.</b><span> Group everything by room; one flat library with a room filter.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Unify the access logic.</b><span> Replace the duplicated front-end and back-end rules with one shared "are you in the room?" source of truth.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Throw away the sticky notes.</b><span> Once the new system has proven itself, delete the old permission mirror, its cleanup robot, and the old share screens.</span><span class="phase-tag clean">clean up</span></li>
+      <li><b>Sunset the old public share link.</b><span> Keep old links working read-only, watch how often they're used, then set a retirement date.</span><span class="phase-tag clean">clean up</span></li>
+    </ol>
+
+    <div class="spacer"></div>
+    <div class="note">
+      <span class="ic">★</span>
+      <div><b>Why this order:</b> steps 1–5 ship invisibly with zero user impact. The migration (6) is the only risky moment, so it runs as a preview first and keeps the old system as a backup. Nothing old gets deleted (10–11) until the new system has been proven correct in production.</div>
+    </div>
   </div>
 </section>
 
@@ -461,8 +371,8 @@
 
 <footer>
   <div class="wrap">
-    <span>Engineering scoping · sharing backend redesign · sanitized public write-up</span>
-    <span>One primitive · two roles · one check</span>
+    <span>Plain-English engineering write-up · sanitized · internal scoping</span>
+    <span>Rooms, not sticky notes.</span>
   </div>
 </footer>
 
