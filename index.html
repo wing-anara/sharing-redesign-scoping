@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Sharing Backend Redesign — Engineering Scoping</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --bg-soft: #11131a;
+    --panel: #14161f;
+    --panel-2: #181b26;
+    --line: #232734;
+    --line-soft: #1c1f2a;
+    --txt: #e7e9ee;
+    --txt-dim: #a3a8b6;
+    --txt-faint: #6e7484;
+    --accent: #7c8cff;
+    --accent-2: #59d3a9;
+    --warn: #f4b860;
+    --danger: #f47174;
+    --radius: 14px;
+    --maxw: 940px;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--txt);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(124,140,255,0.10), transparent 60%),
+      radial-gradient(700px 400px at 0% 5%, rgba(89,211,169,0.06), transparent 55%);
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ---- Top bar ---- */
+  header.top {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(10,11,15,0.72);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 0 16px rgba(124,140,255,0.6); }
+  .top nav { display: flex; gap: 22px; font-size: 13.5px; }
+  .top nav a { color: var(--txt-dim); }
+  .top nav a:hover { color: var(--txt); text-decoration: none; }
+  @media (max-width: 680px) { .top nav { display: none; } }
+
+  /* ---- Hero ---- */
+  .hero { padding: 88px 0 56px; border-bottom: 1px solid var(--line-soft); }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--accent); background: rgba(124,140,255,0.08);
+    border: 1px solid rgba(124,140,255,0.22); padding: 5px 12px; border-radius: 999px;
+  }
+  h1 {
+    font-size: clamp(32px, 5.4vw, 52px); line-height: 1.07; letter-spacing: -0.03em;
+    margin: 22px 0 0; font-weight: 800;
+    background: linear-gradient(180deg, #fff 30%, #b8bdcc);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.lede { font-size: 18.5px; color: var(--txt-dim); max-width: 680px; margin: 20px 0 0; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .chip {
+    font-size: 12.5px; color: var(--txt-dim);
+    border: 1px solid var(--line); background: var(--panel);
+    padding: 6px 12px; border-radius: 8px;
+  }
+  .chip b { color: var(--txt); font-weight: 600; }
+
+  /* ---- Section scaffolding ---- */
+  section { padding: 56px 0; border-bottom: 1px solid var(--line-soft); }
+  .kicker { font-family: var(--mono); font-size: 12.5px; color: var(--accent-2); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 10px; }
+  h2 { font-size: clamp(23px, 3.4vw, 30px); letter-spacing: -0.02em; margin: 0 0 6px; font-weight: 750; }
+  h2 + .sub { color: var(--txt-faint); margin: 0 0 26px; font-size: 15px; }
+  h3 { font-size: 17.5px; letter-spacing: -0.01em; margin: 0 0 8px; font-weight: 650; }
+  p { margin: 0 0 16px; }
+  .dim { color: var(--txt-dim); }
+
+  /* ---- Thesis callout ---- */
+  .thesis {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+  }
+  .thesis strong { color: #fff; }
+
+  /* ---- Cards grid ---- */
+  .grid { display: grid; gap: 16px; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 760px) { .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px 20px 18px;
+  }
+  .card .num { font-family: var(--mono); font-size: 12px; color: var(--txt-faint); }
+  .card h3 { margin-top: 6px; }
+  .card p { font-size: 14.5px; color: var(--txt-dim); margin-bottom: 0; }
+  .tag {
+    display: inline-block; font-size: 11.5px; font-family: var(--mono);
+    padding: 3px 8px; border-radius: 6px; margin-top: 12px;
+  }
+  .tag.read { background: rgba(89,211,169,0.10); color: var(--accent-2); border: 1px solid rgba(89,211,169,0.25); }
+  .tag.author { background: rgba(124,140,255,0.10); color: var(--accent); border: 1px solid rgba(124,140,255,0.25); }
+  .tag.legacy { background: rgba(244,113,116,0.08); color: var(--danger); border: 1px solid rgba(244,113,116,0.22); }
+
+  /* ---- Before / After diagram ---- */
+  .ba { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: stretch; }
+  @media (max-width: 760px) { .ba { grid-template-columns: 1fr; } .ba .arrow { transform: rotate(90deg); justify-self: center; } }
+  .ba-col { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .ba-col.before { border-color: rgba(244,113,116,0.25); }
+  .ba-col.after { border-color: rgba(89,211,169,0.28); }
+  .ba-col h4 { margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--txt-faint); }
+  .ba-col.before h4 { color: var(--danger); }
+  .ba-col.after h4 { color: var(--accent-2); }
+  .arrow { display: flex; align-items: center; color: var(--txt-faint); font-size: 26px; }
+  .node {
+    font-family: var(--mono); font-size: 12.5px; background: var(--bg-soft);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; margin-bottom: 8px;
+  }
+  .node small { display: block; font-family: 'Inter'; color: var(--txt-faint); font-size: 11.5px; margin-top: 3px; }
+  .node.bad { border-color: rgba(244,113,116,0.3); }
+  .node.good { border-color: rgba(89,211,169,0.3); }
+  .fanout { color: var(--danger); font-size: 12px; font-family: var(--mono); margin-top: 6px; }
+  .oneline { color: var(--accent-2); font-size: 12px; font-family: var(--mono); margin-top: 6px; }
+
+  /* ---- Code block ---- */
+  pre {
+    background: #0d0f16; border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; overflow-x: auto; font-family: var(--mono);
+    font-size: 13px; line-height: 1.7; color: #cfd3df; margin: 0 0 16px;
+  }
+  pre .c { color: var(--txt-faint); }
+  pre .k { color: var(--accent); }
+  pre .g { color: var(--accent-2); }
+  pre .r { color: var(--danger); }
+
+  /* ---- Tables ---- */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  th { background: var(--panel-2); color: var(--txt-dim); font-weight: 600; font-size: 12.5px; letter-spacing: 0.02em; text-transform: uppercase; }
+  td { color: var(--txt-dim); }
+  td:first-child { color: var(--txt); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  td code, p code, li code {
+    font-family: var(--mono); font-size: 12.5px; background: var(--bg-soft);
+    border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; color: #c8cdf0;
+  }
+  .pill { font-size: 11px; font-family: var(--mono); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill.keep { background: rgba(89,211,169,0.1); color: var(--accent-2); }
+  .pill.new { background: rgba(124,140,255,0.1); color: var(--accent); }
+  .pill.drop { background: rgba(244,113,116,0.1); color: var(--danger); }
+
+  /* ---- Timeline / issues ---- */
+  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; }
+  ol.steps li {
+    counter-increment: s; position: relative; padding: 16px 0 16px 56px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  ol.steps li:last-child { border-bottom: none; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 14px;
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent);
+    background: rgba(124,140,255,0.08); border: 1px solid rgba(124,140,255,0.22);
+  }
+  ol.steps li b { color: var(--txt); }
+  ol.steps li span { color: var(--txt-dim); font-size: 14.5px; }
+
+  ul.q { list-style: none; padding: 0; margin: 0; }
+  ul.q li { padding: 14px 0 14px 26px; position: relative; border-bottom: 1px solid var(--line-soft); color: var(--txt-dim); }
+  ul.q li:last-child { border-bottom: none; }
+  ul.q li::before { content: "?"; position: absolute; left: 0; top: 13px; font-family: var(--mono); color: var(--warn); font-weight: 600; }
+  ul.q li b { color: var(--txt); font-weight: 600; }
+
+  /* ---- Note banner ---- */
+  .note {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: rgba(244,184,96,0.06); border: 1px solid rgba(244,184,96,0.22);
+    border-radius: 12px; padding: 14px 16px; font-size: 13.5px; color: var(--txt-dim);
+  }
+  .note .ic { color: var(--warn); font-weight: 700; }
+
+  footer { padding: 44px 0 72px; color: var(--txt-faint); font-size: 13px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; align-items: center; }
+
+  .lead-in { color: var(--txt-dim); max-width: 720px; }
+  .spacer-sm { height: 22px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand"><span class="dot"></span> Spaces · Sharing Redesign</div>
+    <nav>
+      <a href="#today">Today</a>
+      <a href="#thesis">Thesis</a>
+      <a href="#model">Model</a>
+      <a href="#migration">Migration</a>
+      <a href="#issues">Issues</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Engineering Scoping · Proposal</span>
+    <h1>Collapsing three sharing<br/>models into one Space</h1>
+    <p class="lede">A redesign of how permissions and sharing are stored and checked — replacing a denormalized per-item permission mirror with a single membership join at the Space boundary.</p>
+    <div class="meta-row">
+      <span class="chip"><b>Status</b> &nbsp;Scoping / proposal</span>
+      <span class="chip"><b>Surface</b> &nbsp;Permissions backend</span>
+      <span class="chip"><b>Outcome</b> &nbsp;One model, two roles</span>
+      <span class="chip">Sanitized public write-up</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- TODAY -->
+<section id="today">
+  <div class="wrap">
+    <p class="kicker">01 — Current state</p>
+    <h2>One runtime model, fed by three authoring models</h2>
+    <p class="sub">The "three parallel systems" framing is right — but the engineering reality is sharper.</p>
+
+    <p class="lead-in">Items and folders are the <strong>same record type</strong>, arranged in a tree by a parent pointer (a folder is just a record that holds children). Access is not computed from share records at read time. Instead, a <strong>denormalized permission table mirrors one row per item, per user</strong> — and that mirror is what every read actually consults. The three "models" below are really three different ways of <em>authoring</em> rows into that one mirror.</p>
+
+    <div class="grid cols-3" style="margin-top: 26px;">
+      <div class="card">
+        <div class="num">model 01</div>
+        <h3>Folder shares</h3>
+        <p>Explicit folder&nbsp;→&nbsp;person invites by email, with an accept / decline lifecycle, plus one shareable invite-link token per folder.</p>
+        <span class="tag author">authoring</span>
+      </div>
+      <div class="card">
+        <div class="num">model 02</div>
+        <h3>Item permission mirror</h3>
+        <p>The real source of truth at read time: a row per <em>(workspace, item, user)</em> with a role, plus a special "everyone" sentinel row for workspace-wide visibility.</p>
+        <span class="tag read">runtime truth</span>
+      </div>
+      <div class="card">
+        <div class="num">model 03</div>
+        <h3>Team folders</h3>
+        <p>A folder flagged non-private becomes visible to the whole workspace — a third path that writes the "everyone" sentinel into the same mirror.</p>
+        <span class="tag author">authoring</span>
+      </div>
+    </div>
+
+    <div class="spacer-sm"></div>
+
+    <div class="thesis" style="border-left-color: var(--danger);">
+      <p style="margin:0;"><strong>The load-bearing problem.</strong> Because the mirror stores one row per descendant, <strong>every membership or visibility change fans out a tree walk that rewrites a row for every item underneath</strong>. Add one member to a folder with 10,000 descendants → 10,000 writes. Flip a folder's visibility → delete-and-reinsert the entire subtree. Creating an item walks up its ancestors to copy down inherited rows. A dedicated backfill job exists <em>solely</em> to keep this mirror consistent — which is itself the tell that the model is fragile.</p>
+    </div>
+
+    <div class="spacer-sm"></div>
+    <div class="note">
+      <span class="ic">⚠</span>
+      <div>The read check <em>also</em> walks ancestors when the direct row misses, and the client re-derives the same rules a second time for UI gating — two implementations of one ruleset that can quietly drift.</div>
+    </div>
+  </div>
+</section>
+
+<!-- THESIS -->
+<section id="thesis">
+  <div class="wrap">
+    <p class="kicker">02 — The thesis</p>
+    <h2>Make access a membership join, not a mirror</h2>
+    <p class="sub">The redesign isn't "add a Space table." It's changing what a permission check reads.</p>
+
+    <div class="ba">
+      <div class="ba-col before">
+        <h4>Today — per-item mirror</h4>
+        <div class="node bad">folder<small>flip visibility →</small></div>
+        <div class="node bad">child · child · child …<small>rewrite a row for every descendant</small></div>
+        <div class="node bad">grand-children …<small>and theirs, recursively</small></div>
+        <div class="fanout">membership change = O(subtree) writes</div>
+        <div class="fanout">read = walk ancestors until a row hits</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="ba-col after">
+        <h4>Proposed — membership join</h4>
+        <div class="node good">item<small>belongs to exactly one Space</small></div>
+        <div class="node good">Space ⇢ members<small>one membership list per Space</small></div>
+        <div class="node good">check = is caller a member?<small>single indexed lookup</small></div>
+        <div class="oneline">membership change = 1 write</div>
+        <div class="oneline">read = one join, no ancestor walk</div>
+      </div>
+    </div>
+
+    <div class="spacer-sm"></div>
+    <div class="thesis">
+      <p style="margin:0 0 12px;"><strong>The move:</strong> introduce a <strong>Space</strong> as the single permission boundary. An item belongs to exactly one Space; access is <em>item → Space → "is the caller a member?"</em></p>
+      <p style="margin:0;" class="dim">Because the design already mandates single-membership ("a file lives in exactly one Space; assigning it is a <em>move</em>"), this is clean. Membership edits — the common case — touch <strong>zero items</strong>. The only operation that still rewrites a subtree is a <em>move</em>, and that's a single indexed-column update per item, not a permission-row explosion. Roles collapse from three to two: <strong>Owner</strong> and <strong>Member</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MODEL -->
+<section id="model">
+  <div class="wrap">
+    <p class="kicker">03 — Proposed data model</p>
+    <h2>One container, one membership list, one check</h2>
+    <p class="sub">The workspace/org stays as the billing + seats wrapper; Spaces live inside it.</p>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Space</h3>
+        <p>The top-level content container. Carries name, icon, a "default / personal" flag (one per user, archive-not-delete), and a "discoverable" flag for open-to-workspace joining.</p>
+      </div>
+      <div class="card">
+        <h3>Space membership</h3>
+        <p>One row per <em>(Space, user)</em> with role <code>OWNER</code> or <code>MEMBER</code>. This single list replaces the entire per-item mirror.</p>
+      </div>
+      <div class="card">
+        <h3>Space invite + invite link</h3>
+        <p>Pending email invites with accept / decline, and a token link for outside recipients — both re-pointed from folder-level to Space-level.</p>
+      </div>
+      <div class="card">
+        <h3>Item → Space pointer</h3>
+        <p>Each item record gains a <code>spaceId</code>. Denormalized so reads are a single lookup; a move rewrites the pointer down the subtree.</p>
+      </div>
+    </div>
+
+    <div class="spacer-sm"></div>
+    <h3>The new access check</h3>
+    <p class="dim">The ancestor walk, the "everyone" sentinel, and the per-item mirror all disappear behind one join:</p>
+    <pre><span class="c">// replaces the recursive ancestor walk + mirror lookup</span>
+<span class="k">function</span> access(item, user) {
+  <span class="k">const</span> role = membership(item.<span class="g">spaceId</span>, user.id)   <span class="c">// one indexed join</span>
+  <span class="k">if</span> (role === <span class="g">'OWNER'</span>)  <span class="k">return</span> read + write + manage
+  <span class="k">if</span> (role === <span class="g">'MEMBER'</span>) <span class="k">return</span> read + write
+  <span class="k">if</span> (space.discoverable) <span class="k">return</span> joinable    <span class="c">// open-to-workspace</span>
+  <span class="k">return</span> <span class="r">forbidden</span>
+}</pre>
+    <div class="note">
+      <span class="ic">★</span>
+      <div>Compliance-gated workspaces, sharing seat limits, and inviter-authority re-validation are <strong>load-bearing and preserved</strong> — re-implemented at the Space level rather than dropped.</div>
+    </div>
+  </div>
+</section>
+
+<!-- MIGRATION -->
+<section id="migration">
+  <div class="wrap">
+    <p class="kicker">04 — Migration</p>
+    <h2>Each existing model maps deterministically</h2>
+    <p class="sub">Runs as a versioned, idempotent backfill with a dry-run that reports any access-widening.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Today</th><th>Becomes</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Private / owner-only items</td><td>The owner's <b>default Space</b></td><td>A one-member Space is simply "private."</td></tr>
+          <tr><td>Team folders (workspace-visible)</td><td>A <b>workspace-wide Space</b></td><td>Discoverable; all workspace members join.</td></tr>
+          <tr><td>Shared folders</td><td>A <b>new Space per top-level shared folder</b></td><td>Accepted recipients become members.</td></tr>
+          <tr><td>Three roles</td><td><b>Two roles</b></td><td>Owner→Owner, full-access→Member, viewer→Member. <span style="color:var(--warn)">Viewers gain write — flag &amp; confirm.</span></td></tr>
+          <tr><td>Pending invites &amp; link tokens</td><td>Space invites &amp; Space link tokens</td><td>Existing tokens must keep resolving.</td></tr>
+          <tr><td>Legacy public chat-share link</td><td>Left read-only through deprecation</td><td>Superseded by query-param share URLs; no data move.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spacer-sm"></div>
+    <div class="note">
+      <span class="ic">⚠</span>
+      <div><b>Sharpest edge — nested shares.</b> A sub-folder can today carry a share distinct from its parent. Single-Space membership can't represent "parent shared with A, child also with B." The likely rule: child shares collapse into the nearest ancestor Space, and any extra members are added there — a conscious widening that the dry-run surfaces for review.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SURFACES -->
+<section id="surfaces">
+  <div class="wrap">
+    <p class="kicker">05 — Surface mapping</p>
+    <h2>What each surface maps to</h2>
+    <p class="sub">Preserved, rebuilt, or consciously dropped.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Surface today</th><th>New</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Share folder (invite by email + role)</td><td>Invite to Space</td><td><span class="pill new">rebuild</span></td></tr>
+          <tr><td>Update / remove a share</td><td>Space member role &amp; removal</td><td><span class="pill keep">O(1) now</span></td></tr>
+          <tr><td>Sharing mode toggle (private/team/invite)</td><td>Space membership + discoverable flag</td><td><span class="pill new">rebuild</span></td></tr>
+          <tr><td>Generate / accept invite link</td><td>Space invite link</td><td><span class="pill keep">preserved</span></td></tr>
+          <tr><td>Share modal + its tab components</td><td>Space members panel</td><td><span class="pill drop">retired</span></td></tr>
+          <tr><td>Sidebar Private / Team / Shared buckets</td><td>Space-grouped sidebar</td><td><span class="pill new">rebuild</span></td></tr>
+          <tr><td>Legacy public chat share + route</td><td>Deprecated, read-only</td><td><span class="pill drop">sunset</span></td></tr>
+          <tr><td>Compliance gating · seat limits · role checks</td><td>Same rules at Space level</td><td><span class="pill keep">preserved</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ISSUES -->
+<section id="issues">
+  <div class="wrap">
+    <p class="kicker">06 — Breakdown</p>
+    <h2>Buildable issues</h2>
+    <p class="sub">Sequenced so the new path lands dark behind a dual-read before anything is cut over.</p>
+
+    <ol class="steps">
+      <li><b>Schema + Space entity.</b> <span>Space, membership, invite, invite-link tables; add the item → Space pointer. No behavior change.</span></li>
+      <li><b>Space-resolving access check.</b> <span>New resolver behind the existing check signature, dual-reading the old mirror as fallback. Keeps all call sites stable.</span></li>
+      <li><b>Default Space at signup.</b> <span>Create a default Space alongside the workspace that's already created per user.</span></li>
+      <li><b>Space CRUD + membership API.</b> <span>Create / rename / archive / invite / remove / role-change, porting compliance, seat-limit, and role-rank guards.</span></li>
+      <li><b>Invite link + redemption.</b> <span>Space link tokens and the workspace-join-then-Space-join path.</span></li>
+      <li><b>Backfill migration.</b> <span>Versioned, idempotent, dry-run with access-widening report; maps the three models and backfills the item pointer.</span></li>
+      <li><b>Move semantics.</b> <span>Assigning an item to a Space = subtree pointer rewrite + a "becomes visible to N members" confirmation.</span></li>
+      <li><b>Sidebar + Library reshape.</b> <span>Space-grouped sidebar; flat Library with a Space filter/column; retire the bucketing logic.</span></li>
+      <li><b>Client permission unification.</b> <span>Replace the duplicated client-side rules with one membership-driven capability source.</span></li>
+      <li><b>Retire the mirror.</b> <span>Once dual-read is proven, drop the per-item mirror, its backfill job, and the old share UI.</span></li>
+      <li><b>Legacy share sunset.</b> <span>Keep the old public chat link read-only, add usage telemetry, set a removal date.</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- OPEN Q -->
+<section id="questions">
+  <div class="wrap">
+    <p class="kicker">07 — Open questions</p>
+    <h2>To resolve before building</h2>
+    <p class="sub">The decisions that change the shape of the work.</p>
+
+    <ul class="q">
+      <li><b>Nested shared folders</b> — collapse into the ancestor Space, or allow sub-Spaces? Single-membership forbids overlapping shares, so we need the rule.</li>
+      <li><b>Dropping the viewer role</b> — migrate viewers to Member (they gain write), or keep a transitional read-only flag for workspaces that rely on it?</li>
+      <li><b>Team folders</b> — one workspace-wide discoverable Space per org, or drop org-wide visibility and make everything an explicit Space?</li>
+      <li><b>Denormalize the pointer vs. resolve-via-root</b> — accept the per-item pointer (fast reads, subtree rewrite on move)? Recommended: yes, denormalize.</li>
+      <li><b>Dual-read window</b> — how long do we keep the old mirror alive as a fallback before deleting it?</li>
+      <li><b>Chats</b> — confirmed exempt from Spaces in the current design; verify they carry no Space pointer at all.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Engineering scoping · sharing backend redesign · sanitized public write-up</span>
+    <span>One primitive · two roles · one check</span>
+  </div>
+</footer>
+
+</body>
+</html>
