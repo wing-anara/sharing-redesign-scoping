@@ -264,14 +264,14 @@
       <div class="row"><div class="ic good">📝</div><div class="txt"><b>Each room has a guest list.</b> You're either the <b>Owner</b> (you run the room — rename it, manage the list) or a <b>Member</b> (you can use everything inside).</div></div>
       <div class="row"><div class="ic good">🔑</div><div class="txt"><b>To share, add a name to the list.</b> That's one entry. None of the files inside change at all.</div></div>
       <div class="row"><div class="ic good">🙂</div><div class="txt"><b>"Private" is just a room with one person in it.</b> "Shared" is a room with more. Same thing, no special mode.</div></div>
-      <div class="row"><div class="ic good">⚡</div><div class="txt"><b>Checking access is one quick look:</b> "what room is this file in, and is this person on that room's list?"</div></div>
+      <div class="row"><div class="ic good">⚡</div><div class="txt"><b>Checking access is one quick look:</b> "what room is this file in, and is this person on that room's list?" (plus: "or was this one file handed to them directly?" — see snag 07).</div></div>
       <div class="row"><div class="ic good">📦</div><div class="txt"><b>A file lives in exactly one room.</b> Putting it in another room is a real <b>move</b> — and we'll warn you it becomes visible to that room's people.</div></div>
     </div>
 
     <div class="spacer"></div>
     <div class="tldr">
       <div class="b"><div class="big r">10,000 → 1</div><p>Adding someone goes from thousands of writes to a single guest-list entry.</p></div>
-      <div class="b"><div class="big g">3 → 1</div><p>Three overlapping sharing systems become one.</p></div>
+      <div class="b"><div class="big g">3 → 2</div><p>Three tangled systems become two: rooms for group sharing, a thin direct-share for one-offs.</p></div>
       <div class="b"><div class="big g">3 → 2</div><p>Roles simplify to just Owner and Member.</p></div>
     </div>
   </div>
@@ -331,6 +331,14 @@
         <div class="body">
           <div class="cell snag"><span class="lbl">The problem</span>Some workspaces have strict rules about who can be shared with and how. Those rules are load-bearing — dropping them would be a real problem.</div>
           <div class="cell plan"><span class="lbl">What we'd do</span><b>Keep every one of them</b>, just re-applied at the room level instead of the folder level. Same limits, same checks, new home.</div>
+        </div>
+      </div>
+
+      <div class="issue">
+        <div class="head"><span class="qn">snag 07</span><h3>Flinging one file at one person</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Rooms are great for sharing a <i>bunch</i> of stuff with a group. But people also just want to fire off <b>one file to one person</b>. If every one-off makes a new room, you get a pile of silly one-file rooms — and worse, the file <b>leaves your own space</b> to live in that new room. Rooms are the wrong tool for this, and it'd quietly recreate the "lots of tiny relationships" problem we set out to kill.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Don't force one-offs through rooms. Keep a <b>thin "direct share"</b> on the side — hand <i>this one file</i> to <i>this one person</i>, no room created, file stays where it is. Access then asks two cheap questions: "in the room?" <b>or</b> "handed this file directly?" So we land at <b>two</b> systems, not one — rooms for durable group sharing, direct-share for quick one-offs. <span style="color:var(--warn)">Product call: how hard do we push people to group things into rooms instead?</span></div>
         </div>
       </div>
 
