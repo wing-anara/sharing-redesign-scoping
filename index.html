@@ -170,6 +170,21 @@
   .scn .scn-btn b { display:block; font-size:12.5px; font-family:var(--mono); }
   .scn .scn-btn span { font-size:11px; color:var(--txt-faint); font-family:var(--mono); }
 
+  /* read vs write panels */
+  .rw { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:680px){ .rw { grid-template-columns:1fr; } }
+  .rwcol { border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg-soft); padding:14px; }
+  .rwcol.read { border-color:rgba(86,214,166,.28); }
+  .rwcol.write { border-color:rgba(139,124,255,.28); }
+  .rwhead { font-family:var(--mono); font-size:11px; color:var(--txt-dim); margin-bottom:12px; }
+  .rwhead b { color:var(--txt); }
+  .estep { font-family:var(--mono); font-size:11px; color:var(--txt-faint); padding:9px 11px; border-radius:8px; border:1px solid var(--line); background:#0b0d14; margin-bottom:7px; display:flex; justify-content:space-between; gap:8px; align-items:center; transition:border-color .2s, color .2s, opacity .2s; word-break:break-all; }
+  .estep.active { color:var(--txt); }
+  .estep.skip { opacity:.32; }
+  .rwout { margin-top:10px; font-family:var(--mono); font-weight:700; font-size:11.5px; padding:11px 13px; border-radius:9px; border:1px dashed var(--line); color:var(--txt-faint); }
+  .rwout.allow { color:var(--accent-2); border-style:solid; border-color:rgba(86,214,166,.5); background:rgba(86,214,166,.09); }
+  .rwout.deny { color:var(--danger); border-style:solid; border-color:rgba(245,121,124,.5); background:rgba(245,121,124,.09); }
+
   /* depth */
   .fd { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   @media (max-width:720px){ .fd { grid-template-columns:1fr; } }
@@ -351,26 +366,33 @@ export const relationTuple = mysqlTable(
 <section id="check">
   <div class="wrap">
     <p class="kicker reveal"><span class="n">03</span> / Evaluation</p>
-    <h2 class="reveal">Check() is a userset rewrite, evaluated lazily</h2>
-    <p class="sub reveal">Pick a subject. The union expands and short-circuits on the first satisfying branch — exactly what the code does.</p>
+    <h2 class="reveal">Reads and writes check different relations</h2>
+    <p class="sub reveal">Pick a subject. The read check resolves <code>viewer</code>, the write check resolves <code>editor</code> — independently. A viewer-only grant passes one and fails the other.</p>
 
     <div class="demo reveal">
       <div class="split">
         <div>
-          <div class="rule"><span class="c">// rewrite rule</span><br/>viewer(doc) ≜ _this ∪ (parent ↦ member)</div>
-          <div class="etree" id="etree">
-            <div class="enode" data-n="root"><span class="lhs">Check(<b>doc:contract</b>, viewer, <span class="subj">U</span>)</span><span class="tag">expand →</span></div>
-            <div class="enode lvl1" data-n="union"><span class="lhs">∪ union</span><span class="tag">_this ∪ parent↦member</span></div>
-            <div class="enode lvl2" data-n="this"><span class="lhs">[_this] ∃ <span class="m">doc:contract#viewer@<span class="subj">U</span></span> ?</span><span class="verdict" id="v_this"></span></div>
-            <div class="enode lvl2" data-n="ttu"><span class="lhs">[ttu] follow <span class="m">doc:contract#parent@space:pharma</span></span><span class="tag">↦</span></div>
-            <div class="enode lvl3" data-n="rec"><span class="lhs">Check(<b>space:pharma</b>, member, <span class="subj">U</span>)</span><span class="tag">recurse</span></div>
-            <div class="enode lvl3" data-n="mem"><span class="lhs">[_this] ∃ <span class="m">space:pharma#member@<span class="subj">U</span></span> ?</span><span class="verdict" id="v_mem"></span></div>
+          <div class="rule"><span class="c">// relation hierarchy — owner ⊂ editor ⊂ viewer</span><br/>owner(doc)&nbsp;&nbsp;≜ _this<br/>editor(doc) ≜ _this ∪ owner ∪ (parent ↦ member)<br/>viewer(doc) ≜ _this ∪ editor ∪ (parent ↦ viewer)</div>
+          <div class="scn" style="margin:14px 0;">
+            <button class="scn-btn" data-scn="sam"><b>user:sam</b><span>direct viewer grant — read only</span></button>
+            <button class="scn-btn" data-scn="dana"><b>user:dana</b><span>space member — read + write</span></button>
+            <button class="scn-btn" data-scn="eve"><b>user:eve</b><span>no edges → no path</span></button>
           </div>
-          <div class="outcome" id="outcome">select a subject →</div>
-          <div class="scn" style="margin-top:14px;">
-            <button class="scn-btn" data-scn="sam"><b>user:sam</b><span>direct viewer grant</span></button>
-            <button class="scn-btn" data-scn="dana"><b>user:dana</b><span>member of space:pharma</span></button>
-            <button class="scn-btn" data-scn="stranger"><b>user:eve</b><span>no edges → no path</span></button>
+          <div class="rw">
+            <div class="rwcol read">
+              <div class="rwhead">READ → Check(doc:contract, <b>viewer</b>, <span class="subj">U</span>)</div>
+              <div class="estep" data-k="r_this"><span>_this · ∃ doc:contract#viewer@<span class="subj">U</span></span><span class="verdict" data-v="r_this"></span></div>
+              <div class="estep" data-k="r_editor"><span>computed · editor(doc:contract)</span><span class="verdict" data-v="r_editor"></span></div>
+              <div class="estep" data-k="r_parent"><span>parent↦viewer · space:pharma#viewer@<span class="subj">U</span></span><span class="verdict" data-v="r_parent"></span></div>
+              <div class="rwout" id="readOut">—</div>
+            </div>
+            <div class="rwcol write">
+              <div class="rwhead">WRITE → Check(doc:contract, <b>editor</b>, <span class="subj">U</span>)</div>
+              <div class="estep" data-k="w_this"><span>_this · ∃ doc:contract#editor@<span class="subj">U</span></span><span class="verdict" data-v="w_this"></span></div>
+              <div class="estep" data-k="w_owner"><span>computed · owner(doc:contract)</span><span class="verdict" data-v="w_owner"></span></div>
+              <div class="estep" data-k="w_parent"><span>parent↦member · space:pharma#member@<span class="subj">U</span></span><span class="verdict" data-v="w_parent"></span></div>
+              <div class="rwout" id="writeOut">—</div>
+            </div>
           </div>
         </div>
 
@@ -382,27 +404,38 @@ import { relationTuple as rt } from '../schema/relation-tuple'
 import type { DB } from '../client' // drizzle-orm/mysql2 database
 
 type ObjectType = 'doc' | 'folder' | 'space'
-type Relation = 'owner' | 'member' | 'parent' | 'viewer'
+type Relation = 'owner' | 'editor' | 'viewer' | 'member' | 'parent'
 type Ref = `${ObjectType}:${string}`
 
 // userset rewrites — the Zanzibar namespace config, as data
 type Rewrite =
   | { kind: 'this' }
+  | { kind: 'computed'; relation: Relation }              // same object, another relation
+  | { kind: 'ttu'; tupleset: Relation; computed: Relation } // tuple-to-userset
   | { kind: 'union'; children: Rewrite[] }
-  | { kind: 'ttu'; tupleset: Relation; computed: Relation }
 
 const _this = (): Rewrite => ({ kind: 'this' })
-const union = (...children: Rewrite[]): Rewrite => ({ kind: 'union', children })
+const computed = (relation: Relation): Rewrite => ({ kind: 'computed', relation })
 const ttu = (tupleset: Relation, computed: Relation): Rewrite => ({ kind: 'ttu', tupleset, computed })
+const union = (...children: Rewrite[]): Rewrite => ({ kind: 'union', children })
 
+// read and write are DIFFERENT relations. owner ⊂ editor ⊂ viewer.
 const REWRITES: Record<ObjectType, Partial<Record<Relation, Rewrite>>> = {
-  space: { member: _this(), owner: _this() },
-  // a doc's viewers = directly granted ∪ members of its parent space
-  doc: { viewer: union(_this(), ttu('parent', 'member')) },
+  space: {
+    member: _this(),   // read + write inside the space
+    viewer: _this(),   // read-only space guests
+  },
+  doc: {
+    owner: _this(),
+    // editors: granted directly, owners, or members of the parent space
+    editor: union(_this(), computed('owner'), ttu('parent', 'member')),
+    // viewers: granted directly, anyone who can edit, or read-only space guests
+    viewer: union(_this(), computed('editor'), ttu('parent', 'viewer')),
+  },
   folder: {},
 }
 
-const MAX_DEPTH = 8
+const MAX_DEPTH = 16
 
 export async function check(
   db: DB, org: string, object: Ref, relation: Relation, userId: string, depth = 0,
@@ -428,11 +461,8 @@ async function evalRule(
       )).limit(1)
       return hit.length > 0
     }
-    case 'union': // short-circuit on the first satisfying branch
-      for (const child of rule.children) {
-        if (await evalRule(db, org, objectType, objectId, relation, userId, child, depth)) return true
-      }
-      return false
+    case 'computed': // another relation on the SAME object (owner ⊂ editor ⊂ viewer)
+      return check(db, org, `${objectType}:${objectId}` as Ref, rule.relation, userId, depth + 1)
     case 'ttu': {
       // follow `parent` edges off this object, recurse `computed` on each
       const parents = await db.select({ t: rt.subjectType, i: rt.subjectId }).from(rt).where(and(
@@ -445,14 +475,24 @@ async function evalRule(
       }
       return false
     }
+    case 'union': // short-circuit on the first satisfying branch
+      for (const child of rule.children) {
+        if (await evalRule(db, org, objectType, objectId, relation, userId, child, depth)) return true
+      }
+      return false
   }
-}</script>
+}
+
+// the OPERATION decides the relation: reads check `viewer`, writes check `editor`.
+// a direct doc#viewer@user grant has no path to `editor` → read-only.
+export const canRead  = (db: DB, org: string, doc: Ref, user: string) => check(db, org, doc, 'viewer', user)
+export const canWrite = (db: DB, org: string, doc: Ref, user: string) => check(db, org, doc, 'editor', user)</script>
         </figure>
       </div>
     </div>
 
     <div class="spacer"></div>
-    <p class="lead-in reveal"><code>_this</code> resolves direct grants with one indexed lookup; <code>parent ↦ member</code> is a tuple-to-userset rewrite — follow the <code>parent</code> edge to the Space, then recurse <code>member</code>. The union short-circuits: <code>user:sam</code> resolves at <code>_this</code>, <code>user:dana</code> only via recursion, <code>user:eve</code> exhausts both. Hot subgraphs are cached; consistency is pinned with a snapshot token.</p>
+    <p class="lead-in reveal">Access isn't a boolean on a grant — it's <em>which relation you Check()</em> for the operation: <code>canRead</code> resolves <code>viewer</code>, <code>canWrite</code> resolves <code>editor</code>. A direct <code>doc#viewer@user</code> grant satisfies <code>viewer</code> but has no path to <code>editor</code> — that's a read-only viewer. Space members hold <code>member</code>, which <code>editor</code> reaches via <code>parent ↦ member</code>, so they read <em>and</em> write. The hierarchy <code>owner ⊂ editor ⊂ viewer</code> is expressed with computed usersets, evaluated lazily with short-circuit and caching.</p>
   </div>
 </section>
 
@@ -488,13 +528,16 @@ export async function grant(
   }).onDuplicateKeyUpdate({ set: { objectId } }) // idempotent no-op
 }
 
-// share one doc with one user → 1 row
+// read-only share → viewer relation, no write path
 await grant(db, org, 'doc:contract', 'viewer', { type: 'user', id: 'sam' })
+
+// full edit share → editor relation
+await grant(db, org, 'doc:contract', 'editor', { type: 'user', id: 'mark' })
 
 // put a doc inside a space → 1 row (the parent edge)
 await grant(db, org, 'doc:contract', 'parent', { type: 'space', id: 'pharma' })
 
-// add a member to a space → 1 row, touches zero documents
+// add a space member → read + write on everything inside, 1 row
 await grant(db, org, 'space:pharma', 'member', { type: 'user', id: 'dana' })</script>
       </figure>
 
@@ -723,37 +766,49 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
   buildGraph();
   document.getElementById('graphReplay').addEventListener('click',playGraph);
 
-  // ---------- 03 EVAL TREE ----------
-  var etree=document.getElementById('etree');
-  var en={ root:etree.querySelector('[data-n=root]'), union:etree.querySelector('[data-n=union]'), this:etree.querySelector('[data-n=this]'),
-    ttu:etree.querySelector('[data-n=ttu]'), rec:etree.querySelector('[data-n=rec]'), mem:etree.querySelector('[data-n=mem]') };
-  var v_this=document.getElementById('v_this'), v_mem=document.getElementById('v_mem'), outcome=document.getElementById('outcome');
-  var subjEls=document.querySelectorAll('#etree .subj');
+  // ---------- 03 READ vs WRITE ----------
+  var checkSec=document.getElementById('check');
+  var subjEls=checkSec.querySelectorAll('.subj');
+  var readAll=['r_this','r_editor','r_parent'], writeAll=['w_this','w_owner','w_parent'];
+  // viewer ≜ _this ∪ computed(editor) ∪ parent↦viewer  ·  editor ≜ _this ∪ computed(owner) ∪ parent↦member
   var scns={
-    sam:{subj:'user:sam', steps:[{n:'root'},{n:'union'},{n:'this',v:v_this,val:true}], skip:['ttu','rec','mem'], end:'allow', msg:'ALLOW · resolved at _this (direct grant)'},
-    dana:{subj:'user:dana', steps:[{n:'root'},{n:'union'},{n:'this',v:v_this,val:false},{n:'ttu'},{n:'rec'},{n:'mem',v:v_mem,val:true}], skip:[], end:'allow', msg:'ALLOW · via parent↦member (recursion)'},
-    stranger:{subj:'user:eve', steps:[{n:'root'},{n:'union'},{n:'this',v:v_this,val:false},{n:'ttu'},{n:'rec'},{n:'mem',v:v_mem,val:false}], skip:[], end:'deny', msg:'DENY · union empty, no path'}
+    sam:{ subj:'user:sam',
+      read:{ lit:['r_this'], val:{r_this:true}, out:'allow', msg:'ALLOW · direct viewer grant' },
+      write:{ lit:writeAll, val:{w_this:false,w_owner:false,w_parent:false}, out:'deny', msg:'DENY · holds viewer, not editor' } },
+    dana:{ subj:'user:dana',
+      read:{ lit:['r_this','r_editor'], val:{r_this:false,r_editor:true}, out:'allow', msg:'ALLOW · viewer ⊇ editor' },
+      write:{ lit:writeAll, val:{w_this:false,w_owner:false,w_parent:true}, out:'allow', msg:'ALLOW · member of parent space' } },
+    eve:{ subj:'user:eve',
+      read:{ lit:readAll, val:{r_this:false,r_editor:false,r_parent:false}, out:'deny', msg:'DENY · no path' },
+      write:{ lit:writeAll, val:{w_this:false,w_owner:false,w_parent:false}, out:'deny', msg:'DENY · no path' } }
   };
   var evalTimers=[];
+  function stepEl(k){ return checkSec.querySelector('.estep[data-k="'+k+'"]'); }
+  function vEl(k){ return checkSec.querySelector('.verdict[data-v="'+k+'"]'); }
   function resetEval(){
     evalTimers.forEach(clearTimeout); evalTimers=[];
-    Object.keys(en).forEach(function(k){ en[k].classList.remove('active','skip'); });
-    v_this.textContent=''; v_this.className='verdict'; v_mem.textContent=''; v_mem.className='verdict'; outcome.className='outcome';
+    readAll.concat(writeAll).forEach(function(k){ var s=stepEl(k); if(s) s.classList.remove('active','skip'); var v=vEl(k); if(v){ v.textContent=''; v.className='verdict'; } });
+    ['readOut','writeOut'].forEach(function(id){ var o=document.getElementById(id); o.className='rwout'; o.textContent='evaluating…'; });
+  }
+  function runCol(conf, all, outId, start){
+    var delay=start, gap=540;
+    conf.lit.forEach(function(k){
+      evalTimers.push(setTimeout(function(){
+        var s=stepEl(k); if(s) s.classList.add('active');
+        var v=vEl(k), val=conf.val[k]; if(v){ v.textContent=val?'TRUE':'FALSE'; v.className='verdict '+(val?'t':'f'); }
+      }, delay)); delay+=gap;
+    });
+    evalTimers.push(setTimeout(function(){ all.forEach(function(k){ if(conf.lit.indexOf(k)<0){ var s=stepEl(k); if(s) s.classList.add('skip'); } }); }, delay));
+    evalTimers.push(setTimeout(function(){ var o=document.getElementById(outId); o.className='rwout '+conf.out; o.textContent=conf.msg; }, delay+120));
+    return delay+280;
   }
   function runEval(key){
     resetEval();
-    var s=scns[key]; subjEls.forEach(function(e){ e.textContent=s.subj; }); outcome.textContent='evaluating…';
-    var delay=0, gap=640;
-    s.steps.forEach(function(st){
-      evalTimers.push(setTimeout(function(){
-        en[st.n].classList.add('active');
-        if(st.v){ st.v.textContent=st.val?'TRUE':'FALSE'; st.v.className='verdict '+(st.val?'t':'f'); }
-      }, delay)); delay+=gap;
-    });
-    evalTimers.push(setTimeout(function(){ s.skip.forEach(function(n){ en[n].classList.add('skip'); }); },delay));
-    evalTimers.push(setTimeout(function(){ outcome.className='outcome '+s.end; outcome.textContent=s.msg; }, delay+120));
+    var s=scns[key]; subjEls.forEach(function(e){ e.textContent=s.subj; });
+    var afterRead=runCol(s.read, readAll, 'readOut', reduce?0:200);
+    runCol(s.write, writeAll, 'writeOut', reduce?0:afterRead);
   }
-  document.querySelectorAll('.scn-btn').forEach(function(b){ b.addEventListener('click',function(){ runEval(b.getAttribute('data-scn')); }); });
+  document.querySelectorAll('#check .scn-btn').forEach(function(b){ b.addEventListener('click',function(){ runEval(b.getAttribute('data-scn')); }); });
 
   // ---------- 05 DEPTH ----------
   var deepHops=document.getElementById('deepHops'), flatHops=document.getElementById('flatHops');
