@@ -207,6 +207,26 @@
   .logos span { font-size:11.5px; font-family:var(--mono); color:var(--txt-dim); background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:7px 12px; transition:border-color .15s, color .15s; }
   .logos span:hover { border-color:var(--accent); color:var(--txt); }
 
+  /* cost model */
+  .ctable { border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:var(--panel); box-shadow:var(--shadow); }
+  .crow { display:grid; grid-template-columns:1.25fr 1.5fr 1.5fr 0.85fr; gap:16px; padding:14px 18px; border-bottom:1px solid var(--line-soft); align-items:center; }
+  .crow:last-child { border-bottom:none; }
+  .crow.head { background:var(--panel-2); font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--txt-faint); }
+  .crow .op { font-weight:600; color:var(--txt); font-size:13.5px; }
+  .crow .cost { font-family:var(--mono); font-size:11.5px; color:var(--txt-dim); }
+  .crow .cost.old { color:#caa6a8; } .crow .cost.new { color:#9fcdb8; }
+  .clbl { display:none; }
+  .vpill { font-family:var(--mono); font-size:10px; padding:3px 9px; border-radius:999px; white-space:nowrap; text-align:center; justify-self:start; }
+  .vpill.win { background:rgba(86,214,166,.12); color:var(--accent-2); border:1px solid rgba(86,214,166,.32); }
+  .vpill.trade { background:rgba(244,189,106,.12); color:var(--amber); border:1px solid rgba(244,189,106,.32); }
+  .vpill.tie { background:rgba(255,255,255,.04); color:var(--txt-dim); border:1px solid var(--line); }
+  @media (max-width:760px){
+    .crow { grid-template-columns:1fr; gap:6px; padding:14px 16px; }
+    .crow.head { display:none; }
+    .clbl { display:inline; color:var(--txt-faint); margin-right:7px; }
+    .crow .op { font-size:14px; margin-bottom:2px; }
+  }
+
   footer { padding:50px 0 80px; color:var(--txt-faint); font-size:12.5px; position:relative; }
   footer::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:min(1000px,calc(100% - 52px)); height:1px; background:linear-gradient(90deg,transparent,var(--line),transparent); }
   footer .wrap { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:space-between; align-items:center; }
@@ -233,6 +253,7 @@
       <a href="#check">Check()</a>
       <a href="#writes">Queries</a>
       <a href="#depth">Depth</a>
+      <a href="#cost">Cost</a>
       <a href="#priorart">Prior art</a>
     </nav>
   </div>
@@ -613,10 +634,72 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
   </div>
 </section>
 
-<!-- 06 PRIOR ART -->
+<!-- 06 COST MODEL -->
+<section id="cost">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="n">06</span> / Cost model</p>
+    <h2 class="reveal">What it costs, honestly</h2>
+    <p class="sub reveal">ReBAC isn't free — it moves cost from writes onto reads. Here's the per-operation trade vs. the denormalized model.</p>
+
+    <div class="ctable reveal">
+      <div class="crow head">
+        <div>Operation</div><div>Old · denormalized ACL</div><div>New · relation tuples</div><div>Verdict</div>
+      </div>
+      <div class="crow">
+        <div class="op">Grant / share access</div>
+        <div class="cost old"><span class="clbl">old</span>O(subtree) writes</div>
+        <div class="cost new"><span class="clbl">new</span>1 write (1 tuple)</div>
+        <div><span class="vpill win">big win</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Revoke access</div>
+        <div class="cost old"><span class="clbl">old</span>O(subtree) deletes</div>
+        <div class="cost new"><span class="clbl">new</span>1 delete</div>
+        <div><span class="vpill win">big win</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Change who-can-see</div>
+        <div class="cost old"><span class="clbl">old</span>O(subtree) recompute</div>
+        <div class="cost new"><span class="clbl">new</span>1 write · 0 docs touched</div>
+        <div><span class="vpill win">big win</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Reconciliation job</div>
+        <div class="cost old"><span class="clbl">old</span>required (repairs drift)</div>
+        <div class="cost new"><span class="clbl">new</span>none — no derived state</div>
+        <div><span class="vpill win">win</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Check one object</div>
+        <div class="cost old"><span class="clbl">old</span>1 read · O(depth) on miss</div>
+        <div class="cost new"><span class="clbl">new</span>few cached SELECTs · bounded</div>
+        <div><span class="vpill tie">~ tie</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">List a user's objects</div>
+        <div class="cost old"><span class="clbl">old</span>1 query (denormalized)</div>
+        <div class="cost new"><span class="clbl">new</span>~3 set queries (reverse index)</div>
+        <div><span class="vpill trade">slight cost</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Re-home a subtree (move)</div>
+        <div class="cost old"><span class="clbl">old</span>O(subtree) rewrite</div>
+        <div class="cost new"><span class="clbl">new</span>O(moved) parent rewrites</div>
+        <div><span class="vpill tie">~ tie</span></div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="callout reveal">
+      <p style="margin:0;"><strong>The trade, in one line:</strong> the <span style="color:var(--accent-2)">green</span> rows — grants, revokes, visibility changes, no reconciliation — are the operations that were <em>pathological</em> in the old model. The <span style="color:var(--amber)">amber</span> cost lands on reads, which <em>cache</em> and don't drift. ReBAC moves cost onto the side that caches well and removes the write-amplification that didn't.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 PRIOR ART -->
 <section id="priorart">
   <div class="wrap">
-    <p class="kicker reveal"><span class="n">06</span> / Prior art</p>
+    <p class="kicker reveal"><span class="n">07</span> / Prior art</p>
     <h2 class="reveal">This is Zanzibar</h2>
     <p class="sub reveal">Relationship-based access control is the de-facto authorization model at scale.</p>
 
