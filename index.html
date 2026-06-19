@@ -4,374 +4,485 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Sharing, explained simply — and how we fix it</title>
+<title>Sharing, explained with pictures</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0a0b0f;
-    --bg-soft: #11131a;
-    --panel: #14161f;
-    --panel-2: #181b26;
-    --line: #232734;
-    --line-soft: #1c1f2a;
-    --txt: #e7e9ee;
-    --txt-dim: #a8adbb;
-    --txt-faint: #6e7484;
-    --accent: #7c8cff;
-    --accent-2: #59d3a9;
-    --warn: #f4b860;
-    --danger: #f47174;
-    --radius: 16px;
-    --maxw: 920px;
-    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --bg:#0a0b0f; --bg-soft:#11131a; --panel:#14161f; --panel-2:#181b26;
+    --line:#232734; --line-soft:#1c1f2a;
+    --txt:#e7e9ee; --txt-dim:#a8adbb; --txt-faint:#6e7484;
+    --accent:#7c8cff; --accent-2:#59d3a9; --warn:#f4b860; --danger:#f47174;
+    --radius:16px; --maxw:940px;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
   body {
-    margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--txt);
-    line-height: 1.68;
-    -webkit-font-smoothing: antialiased;
+    margin:0; font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--bg); color:var(--txt); line-height:1.68; -webkit-font-smoothing:antialiased;
     background-image:
-      radial-gradient(900px 500px at 82% -10%, rgba(124,140,255,0.10), transparent 60%),
-      radial-gradient(700px 400px at 0% 4%, rgba(89,211,169,0.06), transparent 55%);
+      radial-gradient(900px 500px at 82% -10%, rgba(124,140,255,.10), transparent 60%),
+      radial-gradient(700px 400px at 0% 4%, rgba(89,211,169,.06), transparent 55%);
   }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 24px; }
 
-  header.top {
-    position: sticky; top: 0; z-index: 50;
-    backdrop-filter: blur(12px);
-    background: rgba(10,11,15,0.72);
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; }
-  .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 0 16px rgba(124,140,255,0.6); }
-  .top nav { display: flex; gap: 20px; font-size: 13.5px; }
-  .top nav a { color: var(--txt-dim); }
-  .top nav a:hover { color: var(--txt); text-decoration: none; }
-  @media (max-width: 720px) { .top nav { display: none; } }
+  header.top { position:sticky; top:0; z-index:50; backdrop-filter:blur(12px);
+    background:rgba(10,11,15,.72); border-bottom:1px solid var(--line-soft); }
+  .top-inner { display:flex; align-items:center; justify-content:space-between; height:56px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-.01em; }
+  .brand .dot { width:10px; height:10px; border-radius:3px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 0 16px rgba(124,140,255,.6); }
+  .top nav { display:flex; gap:18px; font-size:13.5px; }
+  .top nav a { color:var(--txt-dim); }
+  .top nav a:hover { color:var(--txt); text-decoration:none; }
+  @media (max-width:780px){ .top nav { display:none; } }
 
-  .hero { padding: 80px 0 50px; border-bottom: 1px solid var(--line-soft); }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-    color: var(--accent); background: rgba(124,140,255,0.08);
-    border: 1px solid rgba(124,140,255,0.22); padding: 5px 12px; border-radius: 999px;
-  }
-  h1 {
-    font-size: clamp(31px, 5.2vw, 50px); line-height: 1.08; letter-spacing: -0.03em;
-    margin: 22px 0 0; font-weight: 800;
-    background: linear-gradient(180deg, #fff 30%, #b8bdcc);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .hero p.lede { font-size: 19px; color: var(--txt-dim); max-width: 660px; margin: 20px 0 0; }
-  .hero .one-liner {
-    margin-top: 26px; padding: 16px 20px; border-radius: 12px;
-    background: var(--panel); border: 1px solid var(--line);
-    font-size: 16px;
-  }
-  .hero .one-liner b { color: #fff; }
+  .hero { padding:80px 0 50px; border-bottom:1px solid var(--line-soft); }
+  .eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase; color:var(--accent);
+    background:rgba(124,140,255,.08); border:1px solid rgba(124,140,255,.22); padding:5px 12px; border-radius:999px; }
+  h1 { font-size:clamp(31px,5.2vw,50px); line-height:1.08; letter-spacing:-.03em; margin:22px 0 0; font-weight:800;
+    background:linear-gradient(180deg,#fff 30%,#b8bdcc); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p.lede { font-size:19px; color:var(--txt-dim); max-width:660px; margin:20px 0 0; }
+  .hero .one-liner { margin-top:26px; padding:16px 20px; border-radius:12px; background:var(--panel); border:1px solid var(--line); font-size:16px; }
+  .hero .one-liner b { color:#fff; }
 
-  section { padding: 54px 0; border-bottom: 1px solid var(--line-soft); }
-  .kicker { font-family: var(--mono); font-size: 12.5px; color: var(--accent-2); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 10px; }
-  h2 { font-size: clamp(23px, 3.4vw, 31px); letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 750; }
-  h2 + .sub { color: var(--txt-faint); margin: 0 0 26px; font-size: 15.5px; }
-  h3 { font-size: 17.5px; letter-spacing: -0.01em; margin: 0 0 8px; font-weight: 650; }
-  p { margin: 0 0 16px; }
-  .dim { color: var(--txt-dim); }
-  .lead-in { color: var(--txt-dim); max-width: 720px; }
-  .spacer { height: 24px; }
+  section { padding:54px 0; border-bottom:1px solid var(--line-soft); }
+  .kicker { font-family:var(--mono); font-size:12.5px; color:var(--accent-2); letter-spacing:.06em; text-transform:uppercase; margin:0 0 10px; }
+  h2 { font-size:clamp(23px,3.4vw,31px); letter-spacing:-.02em; margin:0 0 8px; font-weight:750; }
+  h2 + .sub { color:var(--txt-faint); margin:0 0 26px; font-size:15.5px; }
+  h3 { font-size:17.5px; letter-spacing:-.01em; margin:0 0 8px; font-weight:650; }
+  p { margin:0 0 16px; }
+  .dim { color:var(--txt-dim); }
+  .lead-in { color:var(--txt-dim); max-width:730px; }
+  .spacer { height:24px; }
 
-  /* analogy strip */
-  .analogy { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 720px) { .analogy { grid-template-columns: 1fr; } }
-  .ana-card { border-radius: var(--radius); border: 1px solid var(--line); padding: 22px 22px 18px; background: var(--panel); }
-  .ana-card .emoji { font-size: 30px; line-height: 1; }
-  .ana-card h3 { margin: 14px 0 6px; }
-  .ana-card p { font-size: 14.5px; color: var(--txt-dim); margin: 0; }
-  .ana-card.bad { border-color: rgba(244,113,116,0.28); }
-  .ana-card.good { border-color: rgba(89,211,169,0.30); }
-  .ana-card .label { font-size: 11.5px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; }
-  .ana-card.bad .label { color: var(--danger); }
-  .ana-card.good .label { color: var(--accent-2); }
+  /* buttons */
+  .btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600;
+    color:#fff; background:linear-gradient(135deg,var(--accent),#6172f0); border:none; border-radius:10px; padding:11px 18px;
+    transition:transform .12s ease, filter .12s ease; }
+  .btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+  .btn:active { transform:translateY(0); }
+  .btn.ghost { background:var(--panel); border:1px solid var(--line); color:var(--txt-dim); }
+  .btn-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:18px; }
+  .hint { font-size:13px; color:var(--txt-faint); }
 
-  .callout {
-    background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 22px 24px;
-  }
-  .callout.bad { border-left-color: var(--danger); }
-  .callout.good { border-left-color: var(--accent-2); }
-  .callout strong { color: #fff; }
-  .callout p:last-child { margin-bottom: 0; }
+  /* demo shell */
+  .demo { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
 
-  /* step-by-step "what happens" rows */
-  .flow { display: flex; flex-direction: column; gap: 0; }
-  .flow .row { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed var(--line-soft); align-items: flex-start; }
-  .flow .row:last-child { border-bottom: none; }
-  .flow .ic { flex: none; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
-  .flow .ic.bad { background: rgba(244,113,116,0.1); border: 1px solid rgba(244,113,116,0.25); }
-  .flow .ic.good { background: rgba(89,211,169,0.1); border: 1px solid rgba(89,211,169,0.25); }
-  .flow .txt { font-size: 14.5px; color: var(--txt-dim); }
-  .flow .txt b { color: var(--txt); }
+  /* ---- race demo ---- */
+  .race { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:720px){ .race { grid-template-columns:1fr; } }
+  .lane { border-radius:14px; padding:16px; background:var(--bg-soft); border:1px solid var(--line); }
+  .lane.old { border-color:rgba(244,113,116,.28); }
+  .lane.new { border-color:rgba(89,211,169,.30); }
+  .lane h4 { margin:0 0 4px; font-size:13.5px; }
+  .lane.old h4 { color:var(--danger); }
+  .lane.new h4 { color:var(--accent-2); }
+  .lane .cap { font-size:12px; color:var(--txt-faint); margin-bottom:12px; min-height:16px; }
+  .folderbar { font-family:var(--mono); font-size:12px; color:var(--txt-dim); background:#0d0f16; border:1px solid var(--line); border-radius:8px; padding:7px 10px; margin-bottom:12px; }
+  .tiles { display:grid; grid-template-columns:repeat(8,1fr); gap:5px; }
+  @media (max-width:720px){ .tiles { grid-template-columns:repeat(10,1fr); } }
+  .tile { aspect-ratio:1; border-radius:5px; background:#1d2230; border:1px solid var(--line); position:relative; transition:background .2s, border-color .2s, transform .2s; }
+  .tile.stamp-a { background:rgba(244,113,116,.32); border-color:var(--danger); }
+  .tile.stamp-b { background:rgba(244,184,96,.34); border-color:var(--warn); }
+  .tile.pop { transform:scale(1.22); }
+  .notebook { display:flex; flex-direction:column; gap:7px; min-height:122px; }
+  .fact { display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11.5px; background:#0d0f16; border:1px solid rgba(89,211,169,.35); border-radius:8px; padding:8px 10px;
+    opacity:0; transform:translateY(8px); animation:dropIn .45s ease forwards; }
+  .fact .who { color:var(--accent); } .fact .rel { color:var(--txt-faint); } .fact .obj { color:var(--accent-2); }
+  @keyframes dropIn { to { opacity:1; transform:translateY(0); } }
+  .counter { margin-top:12px; font-family:var(--mono); font-size:13px; color:var(--txt-dim); }
+  .counter b { font-size:20px; }
+  .counter.old b { color:var(--danger); } .counter.new b { color:var(--accent-2); }
 
-  /* issue cards */
-  .issues { display: grid; gap: 16px; }
-  .issue {
-    border: 1px solid var(--line); border-radius: var(--radius);
-    background: var(--panel); overflow: hidden;
-  }
-  .issue .head { padding: 18px 22px 14px; }
-  .issue .qn { font-family: var(--mono); font-size: 12px; color: var(--warn); }
-  .issue h3 { margin: 6px 0 0; }
-  .issue .body { display: grid; grid-template-columns: 1fr 1fr; }
-  @media (max-width: 720px) { .issue .body { grid-template-columns: 1fr; } }
-  .issue .cell { padding: 16px 22px 20px; font-size: 14.5px; color: var(--txt-dim); }
-  .issue .cell.snag { border-top: 1px solid var(--line-soft); }
-  .issue .cell.plan { border-top: 1px solid var(--line-soft); background: rgba(124,140,255,0.035); }
-  @media (min-width: 721px) { .issue .cell.plan { border-left: 1px solid var(--line-soft); } }
-  .issue .cell .lbl { display: block; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-  .issue .cell.snag .lbl { color: var(--danger); }
-  .issue .cell.plan .lbl { color: var(--accent); }
+  /* ---- fact anatomy ---- */
+  .anatomy { display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .factbig { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .slot { font-family:var(--mono); border-radius:12px; padding:14px 18px; font-size:15px; border:1px solid var(--line); background:#0d0f16; min-width:120px; text-align:center; transition:opacity .35s, transform .35s; }
+  .slot small { display:block; font-family:'Inter'; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--txt-faint); margin-bottom:5px; }
+  .slot.who { border-color:rgba(124,140,255,.45); color:var(--accent); }
+  .slot.rel { border-color:var(--line); color:var(--txt-dim); }
+  .slot.obj { border-color:rgba(89,211,169,.45); color:var(--accent-2); }
+  .slot.fade { opacity:0; transform:translateY(6px); }
+  .ana-dots { display:flex; gap:7px; }
+  .ana-dots i { width:7px; height:7px; border-radius:50%; background:var(--line); cursor:pointer; transition:background .2s, transform .2s; }
+  .ana-dots i.on { background:var(--accent); transform:scale(1.3); }
 
-  /* build journey */
-  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; }
-  ol.steps li {
-    counter-increment: s; position: relative; padding: 16px 0 16px 56px;
-    border-bottom: 1px solid var(--line-soft);
-  }
-  ol.steps li:last-child { border-bottom: none; }
-  ol.steps li::before {
-    content: counter(s); position: absolute; left: 0; top: 14px;
-    width: 34px; height: 34px; border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent);
-    background: rgba(124,140,255,0.08); border: 1px solid rgba(124,140,255,0.22);
-  }
-  ol.steps li b { color: var(--txt); }
-  ol.steps li span { color: var(--txt-dim); font-size: 14.5px; }
-  .phase-tag { font-size: 10.5px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 5px; margin-left: 8px; vertical-align: middle; }
-  .phase-tag.quiet { background: rgba(124,140,255,0.1); color: var(--accent); }
-  .phase-tag.switch { background: rgba(89,211,169,0.1); color: var(--accent-2); }
-  .phase-tag.clean { background: rgba(244,113,116,0.1); color: var(--danger); }
+  /* ---- flowchart ---- */
+  .flow-grid { display:grid; grid-template-columns:1.4fr 1fr; gap:18px; align-items:start; }
+  @media (max-width:780px){ .flow-grid { grid-template-columns:1fr; } }
+  .ladder { display:flex; flex-direction:column; gap:0; }
+  .step { position:relative; display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:12px; border:1px solid var(--line); background:var(--bg-soft);
+    transition:border-color .25s, background .25s, box-shadow .25s; }
+  .step .qmark { flex:none; width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:13px; color:var(--txt-faint); background:#0d0f16; border:1px solid var(--line); }
+  .step .qbody { font-size:14px; color:var(--txt-dim); }
+  .step .qbody b { color:var(--txt); }
+  .step.active { border-color:var(--accent); background:rgba(124,140,255,.07); box-shadow:0 0 0 1px rgba(124,140,255,.25); }
+  .step.active .qmark { color:#fff; background:linear-gradient(135deg,var(--accent),#6172f0); border-color:transparent; }
+  .connector { height:14px; width:2px; background:var(--line); margin-left:31px; }
+  .connector.lit { background:var(--accent); }
+  .outcome { margin-top:14px; display:flex; gap:10px; align-items:center; font-weight:700; font-size:15px; padding:13px 16px; border-radius:12px; border:1px dashed var(--line); color:var(--txt-faint); transition:all .3s; }
+  .outcome.allow { color:var(--accent-2); border-style:solid; border-color:rgba(89,211,169,.5); background:rgba(89,211,169,.08); }
+  .outcome.deny { color:var(--danger); border-style:solid; border-color:rgba(244,113,116,.5); background:rgba(244,113,116,.08); }
+  .scn { display:flex; flex-direction:column; gap:10px; }
+  .scn .scn-btn { text-align:left; cursor:pointer; border-radius:12px; border:1px solid var(--line); background:var(--panel); padding:13px 15px; transition:border-color .15s, transform .12s; }
+  .scn .scn-btn:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .scn .scn-btn b { display:block; font-size:14px; }
+  .scn .scn-btn span { font-size:12.5px; color:var(--txt-faint); font-family:var(--mono); }
 
-  .note {
-    display: flex; gap: 12px; align-items: flex-start;
-    background: rgba(244,184,96,0.06); border: 1px solid rgba(244,184,96,0.22);
-    border-radius: 12px; padding: 14px 16px; font-size: 14px; color: var(--txt-dim);
-  }
-  .note .ic { color: var(--warn); font-weight: 700; }
+  /* ---- flat vs deep ---- */
+  .fd { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:720px){ .fd { grid-template-columns:1fr; } }
+  .fd-col { border-radius:14px; padding:16px; background:var(--bg-soft); border:1px solid var(--line); }
+  .fd-col.deep { border-color:rgba(244,113,116,.25); }
+  .fd-col.flat { border-color:rgba(89,211,169,.28); }
+  .fd-col h4 { margin:0 0 12px; font-size:13px; }
+  .fd-col.deep h4 { color:var(--danger); } .fd-col.flat h4 { color:var(--accent-2); }
+  .hop { font-family:var(--mono); font-size:12px; padding:9px 11px; border-radius:8px; background:#0d0f16; border:1px solid var(--line); margin-bottom:7px; display:flex; justify-content:space-between; align-items:center; transition:border-color .2s, background .2s; }
+  .hop.checking { border-color:var(--warn); background:rgba(244,184,96,.08); }
+  .hop.hit { border-color:var(--accent-2); background:rgba(89,211,169,.1); }
+  .hop .tagx { font-size:10.5px; color:var(--txt-faint); }
+  .fd-meta { margin-top:10px; font-family:var(--mono); font-size:12.5px; color:var(--txt-dim); }
 
-  .tldr { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-  @media (max-width: 720px) { .tldr { grid-template-columns: 1fr; } }
-  .tldr .b { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
-  .tldr .b .big { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
-  .tldr .b .big.g { color: var(--accent-2); }
-  .tldr .b .big.r { color: var(--danger); }
-  .tldr .b p { font-size: 13.5px; color: var(--txt-dim); margin: 6px 0 0; }
+  /* tables / cards reused */
+  .callout { background:linear-gradient(180deg,var(--panel-2),var(--panel)); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--radius); padding:22px 24px; }
+  .callout.bad { border-left-color:var(--danger); } .callout.good { border-left-color:var(--accent-2); }
+  .callout strong { color:#fff; } .callout p:last-child { margin-bottom:0; }
 
-  footer { padding: 42px 0 70px; color: var(--txt-faint); font-size: 13px; }
-  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; align-items: center; }
+  .tldr { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:720px){ .tldr { grid-template-columns:1fr; } }
+  .tldr .b { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; }
+  .tldr .b .big { font-size:26px; font-weight:700; letter-spacing:-.02em; }
+  .tldr .b .big.g { color:var(--accent-2); } .tldr .b .big.r { color:var(--danger); }
+  .tldr .b p { font-size:13.5px; color:var(--txt-dim); margin:6px 0 0; }
+
+  .logos { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .logos span { font-size:12.5px; font-family:var(--mono); color:var(--txt-dim); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:6px 11px; }
+
+  .tbl-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th,td { text-align:left; padding:12px 16px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  th { background:var(--panel-2); color:var(--txt-dim); font-weight:600; font-size:12.5px; text-transform:uppercase; letter-spacing:.02em; }
+  td { color:var(--txt-dim); } td:first-child { color:var(--txt); font-weight:500; }
+  tr:last-child td { border-bottom:none; }
+
+  .issues { display:grid; gap:16px; }
+  .issue { border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); overflow:hidden; }
+  .issue .head { padding:18px 22px 14px; }
+  .issue .qn { font-family:var(--mono); font-size:12px; color:var(--warn); }
+  .issue h3 { margin:6px 0 0; }
+  .issue .body { display:grid; grid-template-columns:1fr 1fr; }
+  @media (max-width:720px){ .issue .body { grid-template-columns:1fr; } }
+  .issue .cell { padding:16px 22px 20px; font-size:14.5px; color:var(--txt-dim); }
+  .issue .cell.snag { border-top:1px solid var(--line-soft); }
+  .issue .cell.plan { border-top:1px solid var(--line-soft); background:rgba(124,140,255,.035); }
+  @media (min-width:721px){ .issue .cell.plan { border-left:1px solid var(--line-soft); } }
+  .issue .cell .lbl { display:block; font-size:11px; font-family:var(--mono); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+  .issue .cell.snag .lbl { color:var(--danger); } .issue .cell.plan .lbl { color:var(--accent); }
+
+  ol.steps { list-style:none; counter-reset:s; padding:0; margin:0; }
+  ol.steps li { counter-increment:s; position:relative; padding:16px 0 16px 56px; border-bottom:1px solid var(--line-soft); }
+  ol.steps li:last-child { border-bottom:none; }
+  ol.steps li::before { content:counter(s); position:absolute; left:0; top:14px; width:34px; height:34px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent);
+    background:rgba(124,140,255,.08); border:1px solid rgba(124,140,255,.22); }
+  ol.steps li b { color:var(--txt); } ol.steps li span { color:var(--txt-dim); font-size:14.5px; }
+  .phase-tag { font-size:10.5px; font-family:var(--mono); text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:5px; margin-left:8px; vertical-align:middle; }
+  .phase-tag.quiet { background:rgba(124,140,255,.1); color:var(--accent); }
+  .phase-tag.switch { background:rgba(89,211,169,.1); color:var(--accent-2); }
+  .phase-tag.clean { background:rgba(244,113,116,.1); color:var(--danger); }
+
+  .note { display:flex; gap:12px; align-items:flex-start; background:rgba(244,184,96,.06); border:1px solid rgba(244,184,96,.22); border-radius:12px; padding:14px 16px; font-size:14px; color:var(--txt-dim); }
+  .note .ic { color:var(--warn); font-weight:700; }
+
+  footer { padding:42px 0 70px; color:var(--txt-faint); font-size:13px; }
+  footer .wrap { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:space-between; align-items:center; }
 </style>
 </head>
 <body>
 
 <header class="top">
   <div class="wrap top-inner">
-    <div class="brand"><span class="dot"></span> Sharing, made simple</div>
+    <div class="brand"><span class="dot"></span> Sharing, with pictures</div>
     <nav>
-      <a href="#today">Today</a>
-      <a href="#want">What we want</a>
-      <a href="#issues">The snags</a>
-      <a href="#build">The plan</a>
+      <a href="#race">The problem</a>
+      <a href="#facts">The fix</a>
+      <a href="#check">The check</a>
+      <a href="#scale">At scale</a>
+      <a href="#snags">Snags</a>
+      <a href="#plan">Plan</a>
     </nav>
   </div>
 </header>
 
 <div class="hero">
   <div class="wrap">
-    <span class="eyebrow">Explained simply</span>
-    <h1>Sharing is a pile of<br/>sticky notes. Let's<br/>make it rooms.</h1>
-    <p class="lede">A plain-English look at why sharing is slow and fragile today, what we want instead, the tricky bits we have to decide, and the steps to get there safely.</p>
-    <div class="one-liner">
-      <b>One sentence:</b> &nbsp;today we label every single file with "who's allowed." We want to put files in <b>rooms</b> and just keep a <b>guest list</b> for each room.
-    </div>
+    <span class="eyebrow">Explained with moving pictures</span>
+    <h1>Stop stamping<br/>every file.<br/>Just write facts.</h1>
+    <p class="lede">A click-through tour of why sharing is slow today, the one simple idea that fixes it, and how the biggest apps in the world already do it this way.</p>
+    <div class="one-liner"><b>The whole idea:</b> instead of putting a label on every single file, we write down a few short <b>facts</b> — like <i>"Sam can view this file"</i> — and answer every question by reading those facts.</div>
   </div>
 </div>
 
 <main>
 
-<!-- TODAY -->
-<section id="today">
+<!-- 01 RACE -->
+<section id="race">
   <div class="wrap">
-    <p class="kicker">01 — How it works today</p>
-    <h2>We put a sticky note on everything</h2>
-    <p class="sub">And that's exactly why it's slow and breaks.</p>
+    <p class="kicker">01 — The problem, watch it happen</p>
+    <h2>Today we stamp a label on everything</h2>
+    <p class="sub">Press the button. Left is how it works now. Right is the fix. Same action, very different cost.</p>
 
-    <p class="lead-in">Picture your files as <b>boxes inside boxes inside boxes</b> — a folder holds folders, which hold files. When you share the top box with a coworker, the app doesn't just remember "this box is shared." It opens <b>every box and every file inside</b>, all the way down, and sticks a note on each one that says <i>"Sam is allowed here."</i></p>
-
-    <div class="spacer"></div>
-    <div class="flow">
-      <div class="row"><div class="ic bad">📌</div><div class="txt"><b>Share a folder with 10,000 things inside</b> → the app writes 10,000 sticky notes, one per item.</div></div>
-      <div class="row"><div class="ic bad">➕</div><div class="txt"><b>Add a second coworker</b> → another 10,000 notes.</div></div>
-      <div class="row"><div class="ic bad">🔁</div><div class="txt"><b>Change your mind and make it private</b> → peel every note back off and redo them all.</div></div>
-      <div class="row"><div class="ic bad">🤖</div><div class="txt"><b>There's a cleanup robot</b> whose only job is to fix notes that fell out of sync. The fact it needs to exist is the tell that this is fragile.</div></div>
+    <div class="demo">
+      <div class="race">
+        <div class="lane old">
+          <h4>● Old way — stamp every item</h4>
+          <div class="cap" id="oldCap">A folder with lots of stuff inside.</div>
+          <div class="folderbar">📁 Pharma project / …</div>
+          <div class="tiles" id="oldTiles"></div>
+          <div class="counter old">labels written: <b id="oldCount">0</b></div>
+        </div>
+        <div class="lane new">
+          <h4>● New way — write one fact</h4>
+          <div class="cap" id="newCap">Same folder. We just note who can in.</div>
+          <div class="folderbar">📁 Pharma project / …</div>
+          <div class="notebook" id="newCards"></div>
+          <div class="counter new">facts written: <b id="newCount">0</b></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="raceBtn">▶ Share this folder with Anna</button>
+        <button class="btn ghost" id="raceReset">Reset</button>
+        <span class="hint" id="raceHint">Tip: press it twice — share with Anna, then Bob.</span>
+      </div>
     </div>
 
     <div class="spacer"></div>
     <div class="callout bad">
-      <p style="margin:0 0 10px;"><strong>And it's not one sticky-note machine — it's three.</strong> Three different features all scribble onto the same items in slightly different ways:</p>
-      <p style="margin:0;" class="dim">1) "invite this person to this folder" &nbsp;·&nbsp; 2) the sticky notes themselves (what the app actually reads to decide access) &nbsp;·&nbsp; 3) "make this folder visible to everyone at the company." Three overlapping systems = confusing, easy to get wrong, and double the code to keep in sync.</p>
+      <p style="margin:0;"><strong>Why this hurts:</strong> a real folder isn't 24 things — it's thousands. Every share, every "make it private", every role change re-stamps the whole pile. There's even a background clean-up robot whose only job is fixing labels that fell out of sync. The new way writes <strong>one</strong> fact and never touches the files.</p>
     </div>
   </div>
 </section>
 
-<!-- WHAT WE WANT -->
-<section id="want">
+<!-- 02 FACTS -->
+<section id="facts">
   <div class="wrap">
-    <p class="kicker">02 — What we want instead</p>
-    <h2>Rooms with a guest list</h2>
-    <p class="sub">One simple idea replaces all three sticky-note machines.</p>
+    <p class="kicker">02 — The fix</p>
+    <h2>Everything becomes one kind of "fact"</h2>
+    <p class="sub">A fact is just a tiny sentence with three blanks. The shape never changes.</p>
 
-    <div class="analogy">
-      <div class="ana-card bad">
-        <div class="emoji">📌🗄️</div>
-        <span class="label">Today</span>
-        <h3>A note on every object</h3>
-        <p>To let a friend into your house you copy a permission slip onto every book, spoon, and sock. Change the guest list → re-label everything.</p>
-      </div>
-      <div class="ana-card good">
-        <div class="emoji">🚪🗝️</div>
-        <span class="label">The plan</span>
-        <h3>A key to the room</h3>
-        <p>Put your stuff in a room. Keep a guest list on the door. To share, add a name to the list — the stuff inside never gets touched.</p>
+    <div class="demo">
+      <div class="anatomy">
+        <div class="factbig" id="anaFact">
+          <div class="slot who"><small>who / what</small><span id="aWho">Wing</span></div>
+          <div class="slot rel"><small>relationship</small><span id="aRel">is a member of</span></div>
+          <div class="slot obj"><small>which thing</small><span id="aObj">the Pharma room</span></div>
+        </div>
+        <div class="ana-dots" id="anaDots"></div>
+        <p class="hint" id="anaLabel" style="margin:4px 0 0;">Example 1 of 3 — a room membership</p>
       </div>
     </div>
 
     <div class="spacer"></div>
-    <p class="lead-in">We call a room a <b>Space</b>. Here's the whole model:</p>
-    <div class="flow">
-      <div class="row"><div class="ic good">🚪</div><div class="txt"><b>A Space is a room.</b> Your files live inside it.</div></div>
-      <div class="row"><div class="ic good">📝</div><div class="txt"><b>Each room has a guest list.</b> You're either the <b>Owner</b> (you run the room — rename it, manage the list) or a <b>Member</b> (you can use everything inside).</div></div>
-      <div class="row"><div class="ic good">🔑</div><div class="txt"><b>To share, add a name to the list.</b> That's one entry. None of the files inside change at all.</div></div>
-      <div class="row"><div class="ic good">🙂</div><div class="txt"><b>"Private" is just a room with one person in it.</b> "Shared" is a room with more. Same thing, no special mode.</div></div>
-      <div class="row"><div class="ic good">⚡</div><div class="txt"><b>Checking access is one quick look:</b> "what room is this file in, and is this person on that room's list?" (plus: "or was this one file handed to them directly?" — see snag 07).</div></div>
-      <div class="row"><div class="ic good">📦</div><div class="txt"><b>A file lives in exactly one room.</b> Putting it in another room is a real <b>move</b> — and we'll warn you it becomes visible to that room's people.</div></div>
-    </div>
+    <p class="lead-in">That's the trick. <b>Room membership, "this file lives in that room", and "Sam can see this one file" are all the exact same shape of fact</b> — they just go in the same notebook. To share, you add a fact. To un-share, you cross one out. Nothing gets stamped, copied, or cascaded.</p>
 
-    <div class="spacer"></div>
-    <div class="tldr">
-      <div class="b"><div class="big r">10,000 → 1</div><p>Adding someone goes from thousands of writes to a single guest-list entry.</p></div>
-      <div class="b"><div class="big g">3 → 2</div><p>Three tangled systems become two: rooms for group sharing, a thin direct-share for one-offs.</p></div>
+    <div class="tldr" style="margin-top:8px;">
+      <div class="b"><div class="big r">thousands → 1</div><p>Sharing a folder goes from thousands of labels to one fact.</p></div>
+      <div class="b"><div class="big g">3 → 1</div><p>Three tangled sharing systems become one kind of fact.</p></div>
       <div class="b"><div class="big g">3 → 2</div><p>Roles simplify to just Owner and Member.</p></div>
     </div>
   </div>
 </section>
 
-<!-- THE SNAGS / ISSUES -->
-<section id="issues">
+<!-- 03 THE CHECK -->
+<section id="check">
   <div class="wrap">
-    <p class="kicker">03 — The snags</p>
-    <h2>The tricky bits we have to decide</h2>
-    <p class="sub">Switching to rooms is clean — except for these. Each one needs a call before we build.</p>
+    <p class="kicker">03 — The check, as a flowchart</p>
+    <h2>How we answer "can you open this?"</h2>
+    <p class="sub">Pick a person on the right. Watch the question walk down the chart.</p>
 
-    <div class="issues">
-
-      <div class="issue">
-        <div class="head"><span class="qn">snag 01</span><h3>A folder shared two different ways at once</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>Today you can share a big folder with Anna, and <i>separately</i> share one folder inside it with Bob. But a thing can only be in <b>one room</b>. So where does Bob go?</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span>Put Bob on the big room's guest list too. He can now see a bit more than before, so we'd <b>flag every case like this</b> in a preview report and let a human approve it.</div>
+    <div class="demo">
+      <div class="flow-grid">
+        <div>
+          <div class="ladder" id="ladder">
+            <div class="step" data-step="start">
+              <div class="qmark">▸</div>
+              <div class="qbody"><b>Question:</b> can <span id="who">someone</span> open <b>contract.pdf</b>?</div>
+            </div>
+            <div class="connector" data-conn="0"></div>
+            <div class="step" data-step="direct">
+              <div class="qmark">1</div>
+              <div class="qbody">Is there a fact: <b>this person can view contract.pdf</b>? <span class="dim" id="r1"></span></div>
+            </div>
+            <div class="connector" data-conn="1"></div>
+            <div class="step" data-step="inroom">
+              <div class="qmark">2</div>
+              <div class="qbody">Does <b>contract.pdf live in a room</b>? <span class="dim" id="r2"></span></div>
+            </div>
+            <div class="connector" data-conn="2"></div>
+            <div class="step" data-step="member">
+              <div class="qmark">3</div>
+              <div class="qbody">Is this person <b>a member of that room</b>? <span class="dim" id="r3"></span></div>
+            </div>
+          </div>
+          <div class="outcome" id="outcome">Pick a person to run the check →</div>
+        </div>
+        <div class="scn">
+          <button class="scn-btn" data-scn="sam"><b>Sam</b><span>handed the file directly</span></button>
+          <button class="scn-btn" data-scn="dana"><b>Dana</b><span>is in the Pharma room</span></button>
+          <button class="scn-btn" data-scn="stranger"><b>A stranger</b><span>no facts about them</span></button>
         </div>
       </div>
+    </div>
 
-      <div class="issue">
-        <div class="head"><span class="qn">snag 02</span><h3>"Look but don't touch" disappears</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>Today some people are view-only. The new model only has Owner and Member — and Members can edit. So view-only people would gain editing power.</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span>Decide with the team: either accept that view-only becomes can-edit, or keep a temporary read-only flag for the workspaces that truly rely on it. <b>Needs a product call.</b></div>
-        </div>
-      </div>
+    <div class="spacer"></div>
+    <div class="note"><span class="ic">★</span><div>Notice: the check stops the moment it finds a "yes". Sam wins at step 1; Dana at step 3; the stranger falls all the way through to "no". No stamping, no guessing — just reading facts.</div></div>
+  </div>
+</section>
 
-      <div class="issue">
-        <div class="head"><span class="qn">snag 03</span><h3>"Everyone at the company can see this"</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>Today a folder can be visible to the whole company automatically. Rooms are opt-in by guest list, so what happens to "everyone"?</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span>Make one <b>company-wide room</b> that everyone is automatically on, OR drop auto-visibility and make people pick rooms on purpose. Leaning toward a company-wide room.</div>
-        </div>
-      </div>
+<!-- 04 SINGLE FILE -->
+<section id="single">
+  <div class="wrap">
+    <p class="kicker">04 — The worry that started this</p>
+    <h2>"But people share single files all the time…"</h2>
+    <p class="sub">Good instinct. In the old plan that was awkward. With facts, it's nothing.</p>
 
-      <div class="issue">
-        <div class="head"><span class="qn">snag 04</span><h3>Moving stuff between rooms</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>If we stamp the room name onto every file (so reads are fast), then <i>moving</i> a folder to a new room means re-stamping everything inside it — the old subtree problem, but smaller.</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span>Accept it. Moves are rare; sharing happens constantly. Fast reads + the occasional move re-stamp is a much better trade than today's constant re-stamping.</div>
-        </div>
-      </div>
-
-      <div class="issue">
-        <div class="head"><span class="qn">snag 05</span><h3>Not breaking anything during the switch</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>We can't flip a switch overnight on live data and hope. If the new system is wrong, people lose access to their stuff.</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span>Run both systems side by side for a while. The new one answers, the old one is a safety net. Only delete the old one once the new one has proven it gives the same answers.</div>
-        </div>
-      </div>
-
-      <div class="issue">
-        <div class="head"><span class="qn">snag 06</span><h3>Keeping the strict-compliance rules</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>Some workspaces have strict rules about who can be shared with and how. Those rules are load-bearing — dropping them would be a real problem.</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span><b>Keep every one of them</b>, just re-applied at the room level instead of the folder level. Same limits, same checks, new home.</div>
-        </div>
-      </div>
-
-      <div class="issue">
-        <div class="head"><span class="qn">snag 07</span><h3>Flinging one file at one person</h3></div>
-        <div class="body">
-          <div class="cell snag"><span class="lbl">The problem</span>Rooms are great for sharing a <i>bunch</i> of stuff with a group. But people also just want to fire off <b>one file to one person</b>. If every one-off makes a new room, you get a pile of silly one-file rooms — and worse, the file <b>leaves your own space</b> to live in that new room. Rooms are the wrong tool for this, and it'd quietly recreate the "lots of tiny relationships" problem we set out to kill.</div>
-          <div class="cell plan"><span class="lbl">What we'd do</span>Don't force one-offs through rooms. Keep a <b>thin "direct share"</b> on the side — hand <i>this one file</i> to <i>this one person</i>, no room created, file stays where it is. Access then asks two cheap questions: "in the room?" <b>or</b> "handed this file directly?" So we land at <b>two</b> systems, not one — rooms for durable group sharing, direct-share for quick one-offs. <span style="color:var(--warn)">Product call: how hard do we push people to group things into rooms instead?</span></div>
-        </div>
-      </div>
-
+    <div class="callout good">
+      <p style="margin:0 0 12px;"><strong>Sharing one file with one person is just… one fact.</strong> <code style="font-family:var(--mono);font-size:13px;color:var(--accent-2)">Sam · can view · contract.pdf</code></p>
+      <p class="dim" style="margin:0;">No new room gets created. The file doesn't get yanked out of your folders. It's the <em>same</em> kind of fact as a room membership, living in the <em>same</em> notebook — just pointed at one file instead of a whole room. So the "single file → room → user" pile-up never happens: it's one row that says exactly what it means, and the access check already handles it (that was step 1 in the flowchart above).</p>
     </div>
   </div>
 </section>
 
-<!-- THE PLAN -->
-<section id="build">
+<!-- 05 FLAT VS DEEP -->
+<section id="flat">
   <div class="wrap">
-    <p class="kicker">04 — What we need to do</p>
+    <p class="kicker">05 — The speed trick</p>
+    <h2>Why rooms are faster than nested folders</h2>
+    <p class="sub">Press play. Left climbs the whole folder tree. Right asks one question.</p>
+
+    <div class="demo">
+      <div class="fd">
+        <div class="fd-col deep">
+          <h4>● Old: climb every folder above the file</h4>
+          <div id="deepHops"></div>
+          <div class="fd-meta" id="deepMeta">waiting…</div>
+        </div>
+        <div class="fd-col flat">
+          <h4>● New: the file points straight at its room</h4>
+          <div id="flatHops"></div>
+          <div class="fd-meta" id="flatMeta">waiting…</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="fdBtn">▶ Play the access check</button>
+        <span class="hint">Folders still exist for tidiness — they just don't decide access anymore.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 AT SCALE -->
+<section id="scale">
+  <div class="wrap">
+    <p class="kicker">06 — We're not inventing this</p>
+    <h2>This is how the big apps already do it</h2>
+    <p class="sub">The "write facts, follow the facts" approach has a name and a track record.</p>
+
+    <p class="lead-in">It's called <b>relationship-based access control</b> (ReBAC). Google wrote it up as <b>“Zanzibar”</b> and runs Drive, YouTube, Photos and Cloud on it. The open-source versions are <b>OpenFGA</b> (from Auth0/Okta) and <b>SpiceDB</b>. The golden rule in every one of them: <b>store the facts, follow them at read time, cache the hot answers — never copy permissions onto every item.</b> That copying is the exact thing we're trying to delete.</p>
+    <div class="logos">
+      <span>Google Drive</span><span>YouTube</span><span>GitHub</span><span>Figma</span><span>Zanzibar (paper)</span><span>OpenFGA</span><span>SpiceDB</span>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="callout">
+      <p style="margin:0 0 10px;"><strong>But don't cargo-cult Google.</strong> Those engines are built for <em>billions</em> of files and worldwide consistency. We're a focused product, not Google.</p>
+      <p class="dim" style="margin:0;">So the right call for us: <b>adopt the idea now</b> — one "facts" table in our own database, with a small reader and a cache. <b>Skip the separate authz service</b> until permissions actually become a scaling headache. Shape the facts like the standard tuples so we <em>could</em> lift them into OpenFGA later, but don't pay for that complexity today. That's what teams our size (Notion, Linear, Figma early on) actually did.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 SNAGS -->
+<section id="snags">
+  <div class="wrap">
+    <p class="kicker">07 — The honest snags</p>
+    <h2>The tricky bits we still have to decide</h2>
+    <p class="sub">The idea is clean. These few cases need a human call before we build.</p>
+
+    <div class="issues">
+      <div class="issue">
+        <div class="head"><span class="qn">snag 01</span><h3>A folder shared two ways at once</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Today you can share a big folder with Anna and <i>separately</i> share a sub-folder with Bob. With one room per area, where does Bob's extra access go?</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Write Bob a fact on the room (or, if it's really just one folder, a fact on that folder). Anything that <b>widens</b> who-can-see gets flagged in a preview for a human to approve.</div>
+        </div>
+      </div>
+      <div class="issue">
+        <div class="head"><span class="qn">snag 02</span><h3>"Look but don't touch" goes away</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>We're dropping to two roles (Owner / Member), and Members can edit. View-only people would gain editing power.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Product call: accept it, or keep a temporary read-only fact for the few workspaces that truly need it. The "fact" model supports both — it's a decision, not a limitation.</div>
+        </div>
+      </div>
+      <div class="issue">
+        <div class="head"><span class="qn">snag 03</span><h3>"Everyone at the company can see this"</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Today a folder can be visible to the whole company automatically. Rooms are opt-in, so what happens to "everyone"?</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>One <b>company-wide room</b> everyone is automatically a member of — which is, again, just facts. Leaning this way over killing org-wide visibility.</div>
+        </div>
+      </div>
+      <div class="issue">
+        <div class="head"><span class="qn">snag 04</span><h3>Moving stuff between rooms</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>When you move a folder into another room, the "lives in that room" facts for everything inside need updating — a smaller echo of the old problem.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Accept it. Moves are rare; sharing is constant. Updating a "lives-in" fact on a move is far cheaper than re-stamping on every share.</div>
+        </div>
+      </div>
+      <div class="issue">
+        <div class="head"><span class="qn">snag 05</span><h3>Not breaking anything during the switch</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>We can't flip a switch on live data and hope. If the new check is wrong, people lose access to their work.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span>Run both side by side. New check answers; old system is the safety net. Only delete the old one once the new one provably gives the same answers.</div>
+        </div>
+      </div>
+      <div class="issue">
+        <div class="head"><span class="qn">snag 06</span><h3>Keeping the strict-compliance rules</h3></div>
+        <div class="body">
+          <div class="cell snag"><span class="lbl">The problem</span>Some workspaces have strict rules about who can be shared with. Those are load-bearing; dropping them is not an option.</div>
+          <div class="cell plan"><span class="lbl">What we'd do</span><b>Keep every one</b>, re-applied when we write a fact instead of when we stamp a folder. Same rules, new home.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 PLAN -->
+<section id="plan">
+  <div class="wrap">
+    <p class="kicker">08 — What we need to do</p>
     <h2>The plan to make it work</h2>
-    <p class="sub">Build the new thing quietly next to the old thing, copy everyone over, prove it matches, then turn the old thing off.</p>
+    <p class="sub">Build the new thing quietly, copy everyone over, prove it matches, then delete the old thing.</p>
 
     <ol class="steps">
-      <li><b>Create the "rooms" and "guest lists."</b><span> Add the new room, membership, and invite records. Nothing changes for users yet.</span><span class="phase-tag quiet">build quietly</span></li>
-      <li><b>Teach the app to check the guest list.</b><span> Add the new "is this person in the room?" check, but keep reading the old sticky notes as a backup. </span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Make a "facts" table.</b><span> One place to store every fact: memberships, lives-in, and direct shares — all the same shape.</span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Teach the app to read the facts.</b><span> Add the new "follow the facts" check (the flowchart above), but keep the old system answering as backup.</span><span class="phase-tag quiet">build quietly</span></li>
       <li><b>Give everyone a starter room.</b><span> Each person gets a default personal room the moment their account is created.</span><span class="phase-tag quiet">build quietly</span></li>
       <li><b>Build the room controls.</b><span> Create / rename / archive a room, invite people, change roles — carrying over the compliance and limit rules.</span><span class="phase-tag quiet">build quietly</span></li>
-      <li><b>Make invite links work for rooms.</b><span> Share-by-link, including the "join the company, then join the room" path for outsiders.</span><span class="phase-tag quiet">build quietly</span></li>
-      <li><b>Copy everyone into rooms (the big migration).</b><span> A careful, repeatable job that turns today's private / team / shared folders into rooms with the right guest lists. Runs as a preview first so we can eyeball anything that changes.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Make invite links work for rooms.</b><span> Share-by-link, including the "join the company, then the room" path for outsiders.</span><span class="phase-tag quiet">build quietly</span></li>
+      <li><b>Write everyone's facts (the big migration).</b><span> A careful, repeatable job that turns today's private / team / shared folders into facts. Runs as a preview first so we can eyeball anything that widens access.</span><span class="phase-tag switch">the switch</span></li>
       <li><b>Make "assign to a room" a proper move.</b><span> With a clear "this becomes visible to N people" confirmation.</span><span class="phase-tag switch">the switch</span></li>
-      <li><b>Reshape the sidebar and library around rooms.</b><span> Group everything by room; one flat library with a room filter.</span><span class="phase-tag switch">the switch</span></li>
-      <li><b>Unify the access logic.</b><span> Replace the duplicated front-end and back-end rules with one shared "are you in the room?" source of truth.</span><span class="phase-tag switch">the switch</span></li>
-      <li><b>Throw away the sticky notes.</b><span> Once the new system has proven itself, delete the old permission mirror, its cleanup robot, and the old share screens.</span><span class="phase-tag clean">clean up</span></li>
-      <li><b>Sunset the old public share link.</b><span> Keep old links working read-only, watch how often they're used, then set a retirement date.</span><span class="phase-tag clean">clean up</span></li>
+      <li><b>Reshape the sidebar and library around rooms.</b><span> Group by room; one flat library with a room filter.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Use one check everywhere.</b><span> Replace the duplicated front-end and back-end rules with the single "follow the facts" reader.</span><span class="phase-tag switch">the switch</span></li>
+      <li><b>Throw away the stamping machine.</b><span> Once the new check is proven, delete the old per-item labels, the clean-up robot, and the old share screens.</span><span class="phase-tag clean">clean up</span></li>
+      <li><b>Sunset the old public share link.</b><span> Keep old links working read-only, watch usage, then set a retirement date.</span><span class="phase-tag clean">clean up</span></li>
     </ol>
 
     <div class="spacer"></div>
-    <div class="note">
-      <span class="ic">★</span>
-      <div><b>Why this order:</b> steps 1–5 ship invisibly with zero user impact. The migration (6) is the only risky moment, so it runs as a preview first and keeps the old system as a backup. Nothing old gets deleted (10–11) until the new system has been proven correct in production.</div>
-    </div>
+    <div class="note"><span class="ic">★</span><div><b>Why this order:</b> steps 1–5 ship invisibly with zero user impact. The migration (6) is the only risky moment, so it runs as a preview with the old system as a backup. Nothing old gets deleted (9–11) until the new check is proven correct in production.</div></div>
   </div>
 </section>
 
@@ -380,9 +491,185 @@
 <footer>
   <div class="wrap">
     <span>Plain-English engineering write-up · sanitized · internal scoping</span>
-    <span>Rooms, not sticky notes.</span>
+    <span>Write facts. Follow the facts.</span>
   </div>
 </footer>
+
+<script>
+(function(){
+  // ---------- 01 RACE ----------
+  var oldTiles = document.getElementById('oldTiles');
+  var TILE_N = 24;
+  for (var i=0;i<TILE_N;i++){ var t=document.createElement('div'); t.className='tile'; oldTiles.appendChild(t); }
+  var tiles = oldTiles.querySelectorAll('.tile');
+  var newCards = document.getElementById('newCards');
+  var oldCount = document.getElementById('oldCount'), newCount = document.getElementById('newCount');
+  var oldCap = document.getElementById('oldCap'), newCap = document.getElementById('newCap');
+  var raceBtn = document.getElementById('raceBtn'), raceReset = document.getElementById('raceReset');
+  var raceState = 0; // 0 fresh, 1 anna done, 2 bob done
+  var raceTimers = [];
+  function clearRaceTimers(){ raceTimers.forEach(clearTimeout); raceTimers=[]; }
+  function addFact(who, rel, obj){
+    var f=document.createElement('div'); f.className='fact';
+    f.innerHTML='<span class="who">'+who+'</span><span class="rel">'+rel+'</span><span class="obj">'+obj+'</span>';
+    newCards.appendChild(f);
+  }
+  function stampWave(cls, person){
+    var done=0;
+    tiles.forEach(function(tile, idx){
+      var to=setTimeout(function(){
+        tile.classList.remove('stamp-a','stamp-b'); tile.classList.add(cls,'pop');
+        setTimeout(function(){ tile.classList.remove('pop'); },180);
+        done++; oldCount.textContent = (raceState===1? done : TILE_N+done);
+      }, idx*32);
+      raceTimers.push(to);
+    });
+  }
+  function runRace(){
+    clearRaceTimers();
+    if (raceState===0){
+      raceState=1;
+      oldCap.textContent='Stamping "Anna allowed" on every item…';
+      newCap.textContent='Writing one fact about Anna…';
+      stampWave('stamp-a','Anna');
+      addFact('Anna','can use','Pharma room'); newCount.textContent='1';
+      raceBtn.textContent='▶ Now share with Bob too';
+    } else if (raceState===1){
+      raceState=2;
+      oldCap.textContent='…and again for Bob. Every. Single. Item.';
+      newCap.textContent='One more fact. That’s it.';
+      stampWave('stamp-b','Bob');
+      addFact('Bob','can use','Pharma room'); newCount.textContent='2';
+      raceBtn.textContent='✓ See the difference? (Reset)';
+    } else {
+      resetRace();
+    }
+  }
+  function resetRace(){
+    clearRaceTimers(); raceState=0;
+    tiles.forEach(function(t){ t.classList.remove('stamp-a','stamp-b','pop'); });
+    newCards.innerHTML=''; oldCount.textContent='0'; newCount.textContent='0';
+    oldCap.textContent='A folder with lots of stuff inside.';
+    newCap.textContent='Same folder. We just note who can in.';
+    raceBtn.textContent='▶ Share this folder with Anna';
+  }
+  raceBtn.addEventListener('click', runRace);
+  raceReset.addEventListener('click', resetRace);
+
+  // ---------- 02 FACT ANATOMY ----------
+  var examples=[
+    {who:'Wing', rel:'is a member of', obj:'the Pharma room', label:'Example 1 of 3 — a room membership'},
+    {who:'report.pdf', rel:'lives in', obj:'the Pharma room', label:'Example 2 of 3 — a file belongs to a room'},
+    {who:'Sam', rel:'can view', obj:'contract.pdf', label:'Example 3 of 3 — one file shared with one person'}
+  ];
+  var aWho=document.getElementById('aWho'), aRel=document.getElementById('aRel'), aObj=document.getElementById('aObj');
+  var anaLabel=document.getElementById('anaLabel'), anaFact=document.getElementById('anaFact');
+  var anaDots=document.getElementById('anaDots'), anaIdx=0, anaTimer=null;
+  examples.forEach(function(_,i){ var d=document.createElement('i'); d.addEventListener('click',function(){ anaIdx=i; renderAna(); restartAna(); }); anaDots.appendChild(d); });
+  function renderAna(){
+    var slots=anaFact.querySelectorAll('.slot'); slots.forEach(function(s){ s.classList.add('fade'); });
+    setTimeout(function(){
+      var e=examples[anaIdx];
+      aWho.textContent=e.who; aRel.textContent=e.rel; aObj.textContent=e.obj; anaLabel.textContent=e.label;
+      slots.forEach(function(s){ s.classList.remove('fade'); });
+      anaDots.querySelectorAll('i').forEach(function(d,i){ d.classList.toggle('on', i===anaIdx); });
+    },240);
+  }
+  function tickAna(){ anaIdx=(anaIdx+1)%examples.length; renderAna(); }
+  function restartAna(){ if(anaTimer) clearInterval(anaTimer); anaTimer=setInterval(tickAna,2800); }
+  renderAna(); restartAna();
+
+  // ---------- 03 FLOWCHART ----------
+  var ladder=document.getElementById('ladder');
+  var steps={ start:ladder.querySelector('[data-step=start]'), direct:ladder.querySelector('[data-step=direct]'),
+    inroom:ladder.querySelector('[data-step=inroom]'), member:ladder.querySelector('[data-step=member]') };
+  var conns=ladder.querySelectorAll('.connector');
+  var outcome=document.getElementById('outcome'), whoEl=document.getElementById('who');
+  var r1=document.getElementById('r1'), r2=document.getElementById('r2'), r3=document.getElementById('r3');
+  var scns={
+    sam:{name:'Sam', path:['start','direct'], conn:[0], res:{1:'→ yes ✓'}, end:'allow', msg:'✓ Allowed — Sam has a direct fact (step 1).'},
+    dana:{name:'Dana', path:['start','direct','inroom','member'], conn:[0,1,2], res:{1:'→ no',2:'→ yes',3:'→ yes ✓'}, end:'allow', msg:'✓ Allowed — Dana is a member of the file’s room (step 3).'},
+    stranger:{name:'a stranger', path:['start','direct','inroom','member'], conn:[0,1,2], res:{1:'→ no',2:'→ yes',3:'→ no'}, end:'deny', msg:'✕ Denied — no fact gives them access.'}
+  };
+  var flowTimers=[];
+  function resetFlow(){
+    flowTimers.forEach(clearTimeout); flowTimers=[];
+    Object.keys(steps).forEach(function(k){ steps[k].classList.remove('active'); });
+    conns.forEach(function(c){ c.classList.remove('lit'); });
+    r1.textContent=''; r2.textContent=''; r3.textContent='';
+    outcome.className='outcome';
+  }
+  function runFlow(key){
+    resetFlow();
+    var s=scns[key]; whoEl.textContent=s.name; outcome.textContent='checking…';
+    var delay=0, stepGap=620;
+    s.path.forEach(function(stp, i){
+      var to=setTimeout(function(){
+        steps[stp].classList.add('active');
+        if(i>0){ var ci=s.conn[i-1]; if(conns[ci]) conns[ci].classList.add('lit'); }
+        if(stp==='direct' && s.res[1]) r1.textContent=s.res[1];
+        if(stp==='inroom' && s.res[2]) r2.textContent=s.res[2];
+        if(stp==='member' && s.res[3]) r3.textContent=s.res[3];
+      }, delay);
+      flowTimers.push(to); delay+=stepGap;
+    });
+    var end=setTimeout(function(){ outcome.className='outcome '+s.end; outcome.textContent=s.msg; }, delay+120);
+    flowTimers.push(end);
+  }
+  document.querySelectorAll('.scn-btn').forEach(function(b){ b.addEventListener('click',function(){ runFlow(b.getAttribute('data-scn')); }); });
+
+  // ---------- 05 FLAT VS DEEP ----------
+  var deepHops=document.getElementById('deepHops'), flatHops=document.getElementById('flatHops');
+  var deepMeta=document.getElementById('deepMeta'), flatMeta=document.getElementById('flatMeta');
+  var deepChain=['📄 contract.pdf','📁 Q3 deals','📁 Sales','📁 Revenue','📁 Company root'];
+  var fdTimers=[];
+  function buildFD(){
+    deepHops.innerHTML=''; flatHops.innerHTML='';
+    deepChain.forEach(function(name){ var h=document.createElement('div'); h.className='hop'; h.innerHTML='<span>'+name+'</span><span class="tagx">?</span>'; deepHops.appendChild(h); });
+    var f1=document.createElement('div'); f1.className='hop'; f1.innerHTML='<span>📄 contract.pdf</span><span class="tagx">lives in →</span>'; flatHops.appendChild(f1);
+    var f2=document.createElement('div'); f2.className='hop'; f2.innerHTML='<span>🚪 Pharma room</span><span class="tagx">you’re a member ✓</span>'; flatHops.appendChild(f2);
+    deepMeta.textContent='waiting…'; flatMeta.textContent='waiting…';
+  }
+  function playFD(){
+    fdTimers.forEach(clearTimeout); fdTimers=[]; buildFD();
+    var dh=deepHops.querySelectorAll('.hop');
+    var delay=0, gap=560;
+    dh.forEach(function(h, i){
+      fdTimers.push(setTimeout(function(){
+        dh.forEach(function(x){ x.classList.remove('checking'); });
+        h.classList.add('checking'); h.querySelector('.tagx').textContent='checking…';
+        deepMeta.textContent='climbing… '+(i+1)+' of '+dh.length+' folders';
+      }, delay)); delay+=gap;
+    });
+    fdTimers.push(setTimeout(function(){
+      dh[dh.length-1].classList.remove('checking'); dh[dh.length-1].classList.add('hit');
+      dh[dh.length-1].querySelector('.tagx').textContent='found it ✓';
+      deepMeta.textContent='done after '+dh.length+' hops 😮‍💨';
+    }, delay));
+    // flat: two quick hops
+    var fh=flatHops.querySelectorAll('.hop');
+    fdTimers.push(setTimeout(function(){ fh[0].classList.add('checking'); flatMeta.textContent='1 hop: which room?'; },180));
+    fdTimers.push(setTimeout(function(){ fh[0].classList.remove('checking'); fh[1].classList.add('hit'); flatMeta.textContent='done after 1 hop ⚡'; },760));
+  }
+  buildFD();
+  document.getElementById('fdBtn').addEventListener('click', playFD);
+
+  // ---------- autoplay on scroll ----------
+  if ('IntersectionObserver' in window){
+    var seen={};
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting && !seen[e.target.id]){
+          seen[e.target.id]=true;
+          if(e.target.id==='check') runFlow('sam');
+          if(e.target.id==='flat') playFD();
+        }
+      });
+    },{threshold:.4});
+    ['check','flat'].forEach(function(id){ var el=document.getElementById(id); if(el) io.observe(el); });
+  }
+})();
+</script>
 
 </body>
 </html>
