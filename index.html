@@ -203,6 +203,16 @@
   .callout strong { color:#fff; } .callout p:last-child { margin-bottom:0; }
   .callout code { font-family:var(--mono); font-size:12.5px; color:var(--accent-2); background:#0b0d14; border:1px solid var(--line); border-radius:6px; padding:2px 8px; }
 
+  /* framework feature grid */
+  .feat { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:680px){ .feat { grid-template-columns:1fr; } }
+  .feat .f { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); padding:18px; transition:border-color .16s, transform .16s; }
+  .feat .f:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .feat .f h4 { margin:0 0 6px; font-size:13px; font-family:var(--mono); color:var(--accent); }
+  .feat .f p { margin:0; font-size:13px; color:var(--txt-dim); }
+  .apinote { font-family:var(--mono); font-size:11.5px; color:var(--txt-dim); line-height:1.9; background:#0b0d14; border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; }
+  .apinote b { color:var(--accent-2); font-weight:500; }
+
   .logos { display:flex; flex-wrap:wrap; gap:9px; margin-top:8px; }
   .logos span { font-size:11.5px; font-family:var(--mono); color:var(--txt-dim); background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:7px 12px; transition:border-color .15s, color .15s; }
   .logos span:hover { border-color:var(--accent); color:var(--txt); }
@@ -254,6 +264,7 @@
       <a href="#writes">Queries</a>
       <a href="#depth">Depth</a>
       <a href="#cost">Cost</a>
+      <a href="#framework">Framework</a>
       <a href="#priorart">Prior art</a>
     </nav>
   </div>
@@ -708,10 +719,145 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
   </div>
 </section>
 
-<!-- 07 PRIOR ART -->
+<!-- 07 FRAMEWORK -->
+<section id="framework">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="n">07</span> / The framework we'd build</p>
+    <h2 class="reveal">A typed, app-embedded Zanzibar-lite for Drizzle</h2>
+    <p class="sub reveal">Not a separate auth service — a thin layer over the one tuple table, in our DB and our transactions. The §03 rewrites become a typed schema; everything else is a small runtime.</p>
+
+    <div class="feat reveal">
+      <div class="f"><h4>One tuple table</h4><p>Typed entity helpers (<code>user()</code>, <code>doc()</code>, <code>space()</code>), schema-validated grants — no arbitrary strings, no garbage rows.</p></div>
+      <div class="f"><h4>Typed schema DSL</h4><p><code>self · direct · union · computed · tupleToUserset</code> — the exact §03 rewrites, now compile-checked. Invalid relations don't typecheck.</p></div>
+      <div class="f"><h4>Runtime API</h4><p><code>grant · revoke · check · assert · listObjects · deleteObject</code>, plus <code>can(read/write/share)</code> permission aliases.</p></div>
+      <div class="f"><h4>App-embedded</h4><p>Same DB, same transaction (<code>withTx</code>), cache hooks, tenant isolation, and an <code>explain()</code> trace for support tooling.</p></div>
+    </div>
+
+    <div class="spacer"></div>
+    <h3 class="reveal" style="margin-bottom:14px;">The schema is the §03 rewrites, typed</h3>
+    <figure class="editor reveal">
+      <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/authz/schema.ts</span><button class="ecopy" type="button">copy</button></figcaption>
+      <pre class="ecode"><code>import { defineAuthzSchema, self, direct, union, computed, tupleToUserset } from '@acme/rebac'
+
+// the userset rewrites from §03 — now a typed, validated schema
+export const authzSchema = defineAuthzSchema({
+  user: {},
+
+  space: {
+    relations: {
+      member: direct('user'),
+      viewer: union(self(), computed('member')),
+    },
+  },
+
+  doc: {
+    relations: {
+      parent: direct('space'),
+      owner:  direct('user'),
+      editor: union(self(), computed('owner'),  tupleToUserset('parent', 'member')),
+      viewer: union(self(), computed('editor'), tupleToUserset('parent', 'viewer')),
+    },
+    // operation → relation aliases, so app code asks for read/write, not relations
+    permissions: { read: 'viewer', write: 'editor', share: 'owner', delete: 'owner' },
+  },
+})</code></pre>
+    </figure>
+
+    <div class="spacer"></div>
+    <h3 class="reveal" style="margin-bottom:14px;">The runtime — typed, validated, ergonomic</h3>
+    <figure class="editor reveal">
+      <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/authz/index.ts</span><button class="ecopy" type="button">copy</button></figcaption>
+      <pre class="ecode"><code>import { createAuthz, user, doc, space } from '@acme/rebac'
+import { db } from '../db'
+import { relationTuple } from './schema/relation-tuple'
+import { authzSchema } from './schema'
+
+export const authz = createAuthz({ db, schema: authzSchema, tables: { relationTuple }, maxDepth: 8 })
+
+// grant / revoke — one tuple each, no subtree fan-out
+await authz.grant({ object: doc(id), relation: 'viewer', subject: user('sam') })
+await authz.revoke({ object: doc(id), relation: 'viewer', subject: user('sam') })
+
+// check / assert — `relation` is constrained to doc's relations at compile time
+await authz.check({ object: doc(id), relation: 'viewer', subject: user('sam') })  // =&gt; boolean
+await authz.assert({ object: doc(id), relation: 'editor', subject: user('sam') }) // throws ForbiddenError
+
+// permission aliases for app code — read maps to viewer, write to editor
+await authz.can(user(uid), 'read',  doc(id))
+await authz.can(user(uid), 'write', doc(id))
+
+// ❌ compile error: 'member' is not a relation of `doc`
+await authz.check({ object: doc(id), relation: 'member', subject: user('sam') })</code></pre>
+    </figure>
+
+    <div class="spacer"></div>
+    <h3 class="reveal" style="margin-bottom:14px;">The ergonomic wins: native filtering + atomic writes</h3>
+    <figure class="editor reveal">
+      <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">apps/web/server/docs.ts</span><button class="ecopy" type="button">copy</button></figcaption>
+      <pre class="ecode"><code>// listObjects → ids the subject can see (reverse index, no per-row Check)
+const ids = await authz.listObjects({ type: 'doc', relation: 'viewer', subject: user(uid) })
+
+// or push authorization straight into a normal Drizzle query — no N checks:
+const visible = await db.select().from(docs).where(and(
+  eq(docs.organizationId, orgId),
+  await authz.whereCan({ table: docs, idColumn: docs.id, relation: 'viewer', subject: user(uid) }),
+))
+
+// authz tuples commit ATOMICALLY with app data — same transaction
+await db.transaction(async (tx) =&gt; {
+  const az = authz.withTx(tx)
+  await tx.insert(docs).values({ id, title, spaceId })
+  await az.grant({ object: doc(id), relation: 'parent', subject: space(spaceId) })
+  await az.grant({ object: doc(id), relation: 'owner',  subject: user(uid) })
+})</code></pre>
+    </figure>
+
+    <div class="spacer"></div>
+    <div class="split">
+      <div class="reveal">
+        <h3 style="margin-bottom:12px;">explain() — a trace for support tooling</h3>
+        <figure class="editor">
+          <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">explain()</span><button class="ecopy" type="button">copy</button></figcaption>
+          <pre class="ecode"><code>await authz.explain({
+  object: doc('contract'), relation: 'viewer', subject: user('dana'),
+})
+// {
+//   allowed: true,
+//   path: [
+//     'doc:contract#viewer',
+//     'computed → editor',
+//     'tupleToUserset: parent → member',
+//     'doc:contract#parent@space:pharma',
+//     'space:pharma#member@user:dana',
+//   ],
+// }</code></pre>
+        </figure>
+      </div>
+      <div class="reveal">
+        <h3 style="margin-bottom:12px;">v1 surface — deliberately small</h3>
+        <div class="apinote">
+          <b>core</b> · grant · revoke · check · assert · listObjects<br/>
+          <b>cleanup</b> · deleteObject · deleteSubject<br/>
+          <b>tx</b> · withTx · forTenant<br/>
+          <b>dsl</b> · self · direct · union · computed · tupleToUserset<br/>
+          <b>guardrails</b> · maxDepth · maxTuplesPerCheck · timeoutMs · cacheTtlMs<br/>
+          <b>consistency</b> · cache hooks · version bump · <span style="color:var(--txt)">consistency: 'fresh'</span><br/>
+          <b>debug</b> · explain()
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="callout good reveal">
+      <p style="margin:0;"><strong>The shape:</strong> one normalized tuple table, a typed schema, and a thin runtime — bounded traversal, reverse-index listing, transaction support, cache hooks, and <code>explain()</code>. Not a massive auth service: a typed, app-embedded Zanzibar-lite that makes the tuple model feel native to Drizzle.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08 PRIOR ART -->
 <section id="priorart">
   <div class="wrap">
-    <p class="kicker reveal"><span class="n">07</span> / Prior art</p>
+    <p class="kicker reveal"><span class="n">08</span> / Prior art</p>
     <h2 class="reveal">This is Zanzibar</h2>
     <p class="sub reveal">Relationship-based access control is the de-facto authorization model at scale.</p>
 
