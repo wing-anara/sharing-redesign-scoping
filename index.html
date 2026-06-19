@@ -151,6 +151,12 @@
 
   /* eval tree */
   .rule { font-family:var(--mono); font-size:12px; color:var(--accent); background:#0b0d14; border:1px solid rgba(139,124,255,.3); border-radius:9px; padding:10px 13px; margin-bottom:14px; }
+  /* tuple / trace blocks */
+  .tb { font-family:var(--mono); font-size:11.5px; line-height:1.75; white-space:pre; overflow-x:auto; background:#0b0d14; border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; color:var(--txt-dim); margin:0; }
+  .tb.t { border-color:rgba(86,214,166,.28); }
+  .tb .ok { color:var(--accent-2); font-weight:600; } .tb .no { color:var(--danger); font-weight:600; } .tb .c { color:var(--txt-faint); }
+  .tb .us { color:var(--accent); } .tb .ob { color:#79c8ff; }
+  .tb::-webkit-scrollbar { height:9px; } .tb::-webkit-scrollbar-thumb { background:#2a2a35; border-radius:9px; }
   .rule .c { color:var(--txt-faint); }
   .etree { display:flex; flex-direction:column; gap:7px; }
   .enode { font-family:var(--mono); font-size:11.5px; padding:10px 13px; border-radius:9px; border:1px solid var(--line); background:var(--bg-soft); color:var(--txt-dim); transition:border-color .25s, background .25s, opacity .25s, box-shadow .25s; display:flex; justify-content:space-between; gap:10px; align-items:center; }
@@ -265,6 +271,7 @@
       <a href="#depth">Depth</a>
       <a href="#cost">Cost</a>
       <a href="#framework">Framework</a>
+      <a href="#anara">Anara</a>
       <a href="#priorart">Prior art</a>
     </nav>
   </div>
@@ -854,10 +861,92 @@ await db.transaction(async (tx) =&gt; {
   </div>
 </section>
 
-<!-- 08 PRIOR ART -->
+<!-- 08 ANARA EDGE CASES -->
+<section id="anara">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="n">08</span> / Anara's two hard cases</p>
+    <h2 class="reveal">Workspace-wide &amp; cross-org, with primitives</h2>
+    <p class="sub reveal">Anara's permissions do two things a naive tuple table doesn't obviously cover: "everyone in the workspace can see this" (the <code>'workspace'</code> sentinel) and sharing across orgs. Both fall out of standard ReBAC — using <code>subjectRelation</code> and <code>tenantId</code>, columns the schema already has.</p>
+
+    <h3 class="reveal" style="margin-bottom:10px;">Case A · "everyone in the workspace" → a userset subject</h3>
+    <p class="lead-in reveal" style="margin-bottom:14px;">Today this is one <code>chatbotPermission</code> row with <code>userId='workspace'</code>. The fan-out-free equivalent grants the org's whole <code>member</code> set — a <strong>userset subject</strong> (subject is a relation, not a user). One row, expanded at check time.</p>
+    <pre class="tb reveal"><span class="c">// one row = the entire workspace, no per-member fan-out</span>
+doc:report<span class="us">#viewer</span>@<span class="ob">org:acme#member</span></pre>
+    <div class="spacer"></div>
+    <figure class="editor reveal">
+      <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">workspace-wide grant + the one resolver change</span><button class="ecopy" type="button">copy</button></figcaption>
+      <pre class="ecode"><code>import { authz, doc, org } from '../authz'
+
+// grant: "everyone in the workspace can view" — ONE userset tuple
+await authz.grant({
+  object: doc(reportId),
+  relation: 'viewer',
+  subject: { ...org(orgId), relation: 'member' },   // userset subject, not a user
+})
+// → doc:report#viewer@org:acme#member   (subjectRelation = 'member')
+
+// the only resolver change: _this also expands userset subjects
+case 'this': {
+  if (await existsTuple(object, relation, subject)) return true   // direct user grant
+  for (const us of await usersetSubjects(object, relation)) {     // @org:..#member, @group:..#member
+    if (await check({ object: us, relation: us.relation, subject })) return true
+  }
+  return false
+}</code></pre>
+    </figure>
+    <div class="spacer"></div>
+    <pre class="tb t reveal">Check(doc:report, viewer, user:dana)
+  _this · doc:report#viewer@user:dana ........... <span class="no">no</span>
+  _this · doc:report#viewer@org:acme#member ..... userset, recurse
+          Check(org:acme, member, user:dana)
+            org:acme#member@user:dana ........... <span class="ok">YES</span>
+  → <span class="ok">ALLOW</span></pre>
+    <p class="lead-in reveal">Join or leave the org and workspace-wide access follows automatically — no doc rows touched. The same mechanism handles group grants (<code>@group:eng#member</code>).</p>
+
+    <div class="spacer lg"></div>
+
+    <h3 class="reveal" style="margin-bottom:10px;">Case B · sharing across orgs → a resource-tenant grant</h3>
+    <p class="lead-in reveal" style="margin-bottom:14px;">Tuples are tenant-scoped, but a <em>user identity</em> isn't owned by a tenant. A cross-org share is a direct grant that lives in the <strong>resource's</strong> tenant, to a global user id.</p>
+    <pre class="tb reveal"><span class="c">// lives in the resource's tenant; bob's home org is beta — irrelevant</span>
+[tenant=acme] doc:contract<span class="us">#viewer</span>@<span class="ob">user:bob</span></pre>
+    <div class="spacer"></div>
+    <figure class="editor reveal">
+      <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">cross-org grant (resource tenant + policy gate)</span><button class="ecopy" type="button">copy</button></figcaption>
+      <pre class="ecode"><code>import { authz, doc, user } from '../authz'
+
+// share across orgs: the tuple lives in the RESOURCE's tenant; the subject
+// is a global user id. bob's home org is 'beta' — doesn't matter.
+await authz.forTenant('acme').grant(
+  { object: doc(contractId), relation: 'viewer', subject: user('bob') },
+  { policy: requireCrossOrgShareAllowed },   // HIPAA / external-share gate at WRITE time
+)
+// → [tenant=acme] doc:contract#viewer@user:bob
+
+// bob has NO org:acme#member and NO space membership, so workspace-wide and
+// Space-derived docs never reach him — external guests stay bounded by construction.</code></pre>
+    </figure>
+    <div class="spacer"></div>
+    <pre class="tb t reveal">Check[tenant=acme](doc:contract, viewer, user:bob)
+  _this · doc:contract#viewer@user:bob .......... <span class="ok">YES</span>   → <span class="ok">ALLOW</span>
+
+Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspace-wide doc</span>
+  _this · doc:report#viewer@user:bob ............ <span class="no">no</span>
+  _this · doc:report#viewer@org:acme#member ..... userset, recurse
+          Check(org:acme, member, user:bob)
+            org:acme#member@user:bob ............ <span class="no">NO</span>   → <span class="no">DENY</span> (bounded)</pre>
+    <p class="lead-in reveal">External users get <em>only</em> their explicit grants — no <code>org:acme#member</code>, no Space membership — so workspace-wide and Space-derived access never leak to them. That's the "external guest" boundary, by construction. Compliance (HIPAA, "may this org share externally?") is a <strong>policy check at grant time</strong>, not in the resolver: the tuple model permits the edge; policy decides whether it may be written.</p>
+
+    <div class="spacer"></div>
+    <div class="callout good reveal">
+      <p style="margin:0;"><strong>Both reduce to columns the schema already has.</strong> <code>subjectRelation</code> turns "everyone in the workspace" into one userset tuple; <code>tenantId</code> + global user ids make cross-org a direct grant in the resource's tenant. No sentinels, no fan-out, no special cases in the resolver — just two more tuple shapes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 09 PRIOR ART -->
 <section id="priorart">
   <div class="wrap">
-    <p class="kicker reveal"><span class="n">08</span> / Prior art</p>
+    <p class="kicker reveal"><span class="n">09</span> / Prior art</p>
     <h2 class="reveal">This is Zanzibar</h2>
     <p class="sub reveal">Relationship-based access control is the de-facto authorization model at scale.</p>
 
