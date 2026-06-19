@@ -333,7 +333,7 @@
           </div>
           <div class="btn-row"><button class="btn ghost" id="graphReplay">▶ replay insert</button></div>
         </div>
-        <div class="cap-note">Permissions aren't stored — they're <em>paths</em> through this graph, computed on demand. The tuples on the right are exactly these edges.</div>
+        <div class="cap-note">Permissions aren't stored — they're <em>paths</em> through this graph, computed on demand. The tuples on the right are exactly these edges. <span class="dim">(<code>doc:contract</code> is <code>objectType:objectId</code> — readable labels here; stored as two indexed columns, queried by exact match.)</span></div>
       </div>
 
       <figure class="editor reveal">
@@ -550,17 +550,21 @@ export async function grant(
   }).onDuplicateKeyUpdate({ set: { objectId } }) // idempotent no-op
 }
 
+// a Ref is just `${objectType}:${objectId}` — grant() splits it into the
+// indexed objectType + objectId columns. ids are real values (cuids);
+// every query is an exact column lookup, never a LIKE on the string.
+
 // read-only share → viewer relation, no write path
-await grant(db, org, 'doc:contract', 'viewer', { type: 'user', id: 'sam' })
+await grant(db, org, `doc:${doc.id}`, 'viewer', { type: 'user', id: sam.id })
 
 // full edit share → editor relation
-await grant(db, org, 'doc:contract', 'editor', { type: 'user', id: 'mark' })
+await grant(db, org, `doc:${doc.id}`, 'editor', { type: 'user', id: mark.id })
 
 // put a doc inside a space → 1 row (the parent edge)
-await grant(db, org, 'doc:contract', 'parent', { type: 'space', id: 'pharma' })
+await grant(db, org, `doc:${doc.id}`, 'parent', { type: 'space', id: space.id })
 
 // add a space member → read + write on everything inside, 1 row
-await grant(db, org, 'space:pharma', 'member', { type: 'user', id: 'dana' })</script>
+await grant(db, org, `space:${space.id}`, 'member', { type: 'user', id: dana.id })</script>
       </figure>
 
       <figure class="editor reveal">
