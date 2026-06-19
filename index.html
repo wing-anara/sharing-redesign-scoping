@@ -378,6 +378,7 @@ export const relationTuple = mysqlTable(
             <button class="scn-btn" data-scn="dana"><b>user:dana</b><span>space member — read + write</span></button>
             <button class="scn-btn" data-scn="eve"><b>user:eve</b><span>no edges → no path</span></button>
           </div>
+          <div class="hint" style="margin:0 0 12px; line-height:1.6;">These rows are <b>reads</b>, not writes. One <code style="font-size:11px;color:#cdd3f5;background:#0b0d14;border:1px solid var(--line-soft);border-radius:4px;padding:0 5px;">Check()</code> is a few indexed <code style="font-size:11px;color:#cdd3f5;background:#0b0d14;border:1px solid var(--line-soft);border-radius:4px;padding:0 5px;">SELECT</code>s — bounded depth (§05), short-circuited (greyed rows never run), and cached, so hot checks are O(1). Lists don’t Check per item: they hit the reverse index once (§04). “READ/WRITE” names the operation being authorized, not a DB write.</div>
           <div class="rw">
             <div class="rwcol read">
               <div class="rwhead">READ → Check(doc:contract, <b>viewer</b>, <span class="subj">U</span>)</div>
