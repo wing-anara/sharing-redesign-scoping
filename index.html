@@ -262,7 +262,7 @@
 <div class="hero">
   <div class="wrap">
     <span class="eyebrow">Authorization model · Drizzle / MySQL</span>
-    <h1>Sharing as a<br/><em>relation-tuple</em> graph</h1>
+    <h1>Sharing as a <br/><em>relation-tuple</em> graph</h1>
     <p class="lede">Replacing per-object ACL denormalization with relationship-based access control: typed relation tuples in one MySQL table, access decided by graph traversal at read time.</p>
     <div class="one-liner"><b>Thesis:</b> stop materializing a permission row per <code>(object, subject)</code>. Persist edges as tuples — <code>object#relation@subject</code> — and resolve <code>Check(object, relation, subject)</code> as a userset rewrite over the graph, cached.</div>
   </div>
@@ -303,7 +303,7 @@
 
     <div class="spacer"></div>
     <div class="callout bad reveal">
-      <p style="margin:0;"><strong>Why it hurts:</strong> write amplification is <code>O(subtree)</code> per grant; re-parenting or a visibility flip triggers an unbounded subtree recompute (delete + reinsert every descendant row), and a background reconciliation job has to exist to repair drift. The tuple model writes <strong>one</strong> row per grant and derives the rest at read time.</p>
+      <p style="margin:0;"><strong>Why it hurts:</strong> write amplification is <code>O(subtree)</code> per grant; re-parenting or a visibility flip triggers an unbounded subtree recompute (delete + reinsert every descendant row), and a background reconciliation job has to exist to repair drift. The tuple model writes <strong>one</strong> row per grant and derives the rest at read time. <span class="dim">(The only writes are grants and revokes — one row each. Permission <em>checks</em> are reads; "READ/WRITE" in §03 names the operation being authorized, not a DB write.)</span></p>
     </div>
   </div>
 </section>
@@ -338,8 +338,7 @@
 
       <figure class="editor reveal">
         <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/db/schema/relation-tuple.ts</span><button class="ecopy" type="button">copy</button></figcaption>
-        <pre class="ecode"><code></code></pre>
-        <script type="text/plain" class="esrc">import { mysqlTable, varchar, datetime, index, uniqueIndex } from 'drizzle-orm/mysql-core'
+        <pre class="ecode"><code>import { mysqlTable, varchar, datetime, index, uniqueIndex } from 'drizzle-orm/mysql-core'
 import { sql } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
 
@@ -347,7 +346,7 @@ import { createId } from '@paralleldrive/cuid2'
 export const relationTuple = mysqlTable(
   'RelationTuple',
   {
-    id: varchar({ length: 191 }).primaryKey().$defaultFn(() => createId()),
+    id: varchar({ length: 191 }).primaryKey().$defaultFn(() =&gt; createId()),
     organizationId: varchar({ length: 191 }).notNull(),
 
     // object = `${objectType}:${objectId}`   e.g. doc:contract
@@ -366,7 +365,7 @@ export const relationTuple = mysqlTable(
     createdAt: datetime({ mode: 'string', fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`).notNull(),
   },
-  (t) => [
+  (t) =&gt; [
     // a fact is stored exactly once
     uniqueIndex('rt_fact').on(
       t.organizationId, t.objectType, t.objectId,
@@ -377,7 +376,7 @@ export const relationTuple = mysqlTable(
     // reverse index — ListObjects(): what does this subject relate to?
     index('rt_reverse').on(t.organizationId, t.subjectType, t.subjectId, t.relation, t.objectType),
   ],
-)</script>
+)</code></pre>
       </figure>
     </div>
   </div>
@@ -420,8 +419,7 @@ export const relationTuple = mysqlTable(
 
         <figure class="editor">
           <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/db/authz/check.ts</span><button class="ecopy" type="button">copy</button></figcaption>
-          <pre class="ecode"><code></code></pre>
-          <script type="text/plain" class="esrc">import { and, eq, sql } from 'drizzle-orm'
+          <pre class="ecode"><code>import { and, eq, sql } from 'drizzle-orm'
 import { relationTuple as rt } from '../schema/relation-tuple'
 import type { DB } from '../client' // drizzle-orm/mysql2 database
 
@@ -436,13 +434,13 @@ type Rewrite =
   | { kind: 'ttu'; tupleset: Relation; computed: Relation } // tuple-to-userset
   | { kind: 'union'; children: Rewrite[] }
 
-const _this = (): Rewrite => ({ kind: 'this' })
-const computed = (relation: Relation): Rewrite => ({ kind: 'computed', relation })
-const ttu = (tupleset: Relation, computed: Relation): Rewrite => ({ kind: 'ttu', tupleset, computed })
-const union = (...children: Rewrite[]): Rewrite => ({ kind: 'union', children })
+const _this = (): Rewrite =&gt; ({ kind: 'this' })
+const computed = (relation: Relation): Rewrite =&gt; ({ kind: 'computed', relation })
+const ttu = (tupleset: Relation, computed: Relation): Rewrite =&gt; ({ kind: 'ttu', tupleset, computed })
+const union = (...children: Rewrite[]): Rewrite =&gt; ({ kind: 'union', children })
 
 // read and write are DIFFERENT relations. owner ⊂ editor ⊂ viewer.
-const REWRITES: Record<ObjectType, Partial<Record<Relation, Rewrite>>> = {
+const REWRITES: Record&lt;ObjectType, Partial&lt;Record&lt;Relation, Rewrite&gt;&gt;&gt; = {
   space: {
     member: _this(),   // read + write inside the space
     viewer: _this(),   // read-only space guests
@@ -461,8 +459,8 @@ const MAX_DEPTH = 16
 
 export async function check(
   db: DB, org: string, object: Ref, relation: Relation, userId: string, depth = 0,
-): Promise<boolean> {
-  if (depth > MAX_DEPTH) return false
+): Promise&lt;boolean&gt; {
+  if (depth &gt; MAX_DEPTH) return false
   const [objectType, objectId] = object.split(':') as [ObjectType, string]
   const rule = REWRITES[objectType]?.[relation] ?? _this()
   return evalRule(db, org, objectType, objectId, relation, userId, rule, depth)
@@ -471,7 +469,7 @@ export async function check(
 async function evalRule(
   db: DB, org: string, objectType: ObjectType, objectId: string,
   relation: Relation, userId: string, rule: Rewrite, depth: number,
-): Promise<boolean> {
+): Promise&lt;boolean&gt; {
   switch (rule.kind) {
     case 'this': {
       // single indexed lookup against the forward index
@@ -481,7 +479,7 @@ async function evalRule(
         eq(rt.relation, relation),
         eq(rt.subjectType, 'user'), eq(rt.subjectId, userId), eq(rt.subjectRelation, ''),
       )).limit(1)
-      return hit.length > 0
+      return hit.length &gt; 0
     }
     case 'computed': // another relation on the SAME object (owner ⊂ editor ⊂ viewer)
       return check(db, org, `${objectType}:${objectId}` as Ref, rule.relation, userId, depth + 1)
@@ -507,14 +505,20 @@ async function evalRule(
 
 // the OPERATION decides the relation: reads check `viewer`, writes check `editor`.
 // a direct doc#viewer@user grant has no path to `editor` → read-only.
-export const canRead  = (db: DB, org: string, doc: Ref, user: string) => check(db, org, doc, 'viewer', user)
-export const canWrite = (db: DB, org: string, doc: Ref, user: string) => check(db, org, doc, 'editor', user)</script>
+export const canRead  = (db: DB, org: string, doc: Ref, user: string) =&gt; check(db, org, doc, 'viewer', user)
+export const canWrite = (db: DB, org: string, doc: Ref, user: string) =&gt; check(db, org, doc, 'editor', user)</code></pre>
         </figure>
       </div>
     </div>
 
     <div class="spacer"></div>
     <p class="lead-in reveal">Access isn't a boolean on a grant — it's <em>which relation you Check()</em> for the operation: <code>canRead</code> resolves <code>viewer</code>, <code>canWrite</code> resolves <code>editor</code>. A direct <code>doc#viewer@user</code> grant satisfies <code>viewer</code> but has no path to <code>editor</code> — that's a read-only viewer. Space members hold <code>member</code>, which <code>editor</code> reaches via <code>parent ↦ member</code>, so they read <em>and</em> write. The hierarchy <code>owner ⊂ editor ⊂ viewer</code> is expressed with computed usersets, evaluated lazily with short-circuit and caching.</p>
+
+    <div class="spacer"></div>
+    <div class="callout reveal">
+      <p style="margin:0 0 10px;"><strong>Cache &amp; revoke semantics.</strong> Check results key on <code>(object, relation, subject)</code>. A direct revoke is <em>immediate</em> at the source of truth — deleting the tuple removes the edge, so any uncached check is correct at once.</p>
+      <p class="dim" style="margin:0;">Invalidation: a grant/revoke purges the cache keys it <em>directly</em> touches. Derived access (one Space-membership change affecting many docs) is the read-side echo of the old write fan-out, so we <strong>don't</strong> fan out invalidations — we stamp a per-Space version into the key and lean on a short TTL, which bounds worst-case staleness for inherited access. Read-your-writes is guaranteed within a request by a snapshot token (Zookie). Net revoke latency: <strong>immediate for the direct edge, ≤ TTL for inherited access</strong> — a deliberate, tunable bound rather than a hidden one.</p>
+    </div>
   </div>
 </section>
 
@@ -528,8 +532,7 @@ export const canWrite = (db: DB, org: string, doc: Ref, user: string) => check(d
     <div class="split">
       <figure class="editor reveal">
         <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/db/authz/grant.ts</span><button class="ecopy" type="button">copy</button></figcaption>
-        <pre class="ecode"><code></code></pre>
-        <script type="text/plain" class="esrc">import { relationTuple as rt } from '../schema/relation-tuple'
+        <pre class="ecode"><code>import { relationTuple as rt } from '../schema/relation-tuple'
 import type { DB } from '../client'
 
 type Subject =
@@ -564,30 +567,35 @@ await grant(db, org, `doc:${doc.id}`, 'editor', { type: 'user', id: mark.id })
 await grant(db, org, `doc:${doc.id}`, 'parent', { type: 'space', id: space.id })
 
 // add a space member → read + write on everything inside, 1 row
-await grant(db, org, `space:${space.id}`, 'member', { type: 'user', id: dana.id })</script>
+await grant(db, org, `space:${space.id}`, 'member', { type: 'user', id: dana.id })</code></pre>
       </figure>
 
       <figure class="editor reveal">
         <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/db/authz/list-objects.ts</span><button class="ecopy" type="button">copy</button></figcaption>
-        <pre class="ecode"><code></code></pre>
-        <script type="text/plain" class="esrc">import { and, eq, inArray } from 'drizzle-orm'
+        <pre class="ecode"><code>import { and, eq, inArray } from 'drizzle-orm'
 import { relationTuple as rt } from '../schema/relation-tuple'
 import type { DB } from '../client'
 
-// "Which docs can this user view?" — direct grants ∪ docs whose
-// parent is a space the user belongs to. All via the reverse index.
+// "Which docs can this user VIEW?"  viewer ⊇ editor ⊇ owner, and a doc
+// inherits from its parent space (members edit, guests read). Three
+// reverse-index sweeps — no per-doc Check(), bounded by index, not by N.
 export async function listViewableDocs(db: DB, org: string, userId: string) {
+  // 1. direct grants on docs — any relation implies viewer
   const direct = await db.select({ id: rt.objectId }).from(rt).where(and(
-    eq(rt.organizationId, org), eq(rt.objectType, 'doc'), eq(rt.relation, 'viewer'),
+    eq(rt.organizationId, org), eq(rt.objectType, 'doc'),
+    inArray(rt.relation, ['owner', 'editor', 'viewer']),
     eq(rt.subjectType, 'user'), eq(rt.subjectId, userId),
   ))
 
+  // 2. spaces the user belongs to — member ⇒ edit, viewer ⇒ read-only
   const spaces = await db.select({ id: rt.objectId }).from(rt).where(and(
-    eq(rt.organizationId, org), eq(rt.objectType, 'space'), eq(rt.relation, 'member'),
+    eq(rt.organizationId, org), eq(rt.objectType, 'space'),
+    inArray(rt.relation, ['member', 'viewer']),
     eq(rt.subjectType, 'user'), eq(rt.subjectId, userId),
   ))
 
-  const spaceIds = spaces.map((s) => s.id)
+  // 3. docs parented in any of those spaces (one IN-list query)
+  const spaceIds = spaces.map((s) =&gt; s.id)
   const derived = spaceIds.length
     ? await db.select({ id: rt.objectId }).from(rt).where(and(
         eq(rt.organizationId, org), eq(rt.objectType, 'doc'), eq(rt.relation, 'parent'),
@@ -595,8 +603,8 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
       ))
     : []
 
-  return [...new Set([...direct, ...derived].map((r) => r.id))]
-}</script>
+  return [...new Set([...direct, ...derived].map((r) =&gt; r.id))]
+}</code></pre>
       </figure>
     </div>
 
@@ -612,7 +620,7 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
   <div class="wrap">
     <p class="kicker reveal"><span class="n">05</span> / Traversal depth</p>
     <h2 class="reveal">A flat Space boundary bounds Check() recursion</h2>
-    <p class="sub reveal">Organizational folder nesting stays out of the authorization graph, so depth is constant.</p>
+    <p class="sub reveal">The obvious objection — "our folders nest deeply, won't auth traversal be deep too?" — doesn't apply: <strong>folders are a UI hierarchy, not edges in the auth graph.</strong> Only one <code>doc#parent@space</code> edge matters, so depth is constant no matter how deep the UI nests.</p>
 
     <div class="demo reveal">
       <div class="fd">
@@ -746,8 +754,8 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
     });
   }
   document.querySelectorAll('.editor').forEach(function(ed){
-    var src=ed.querySelector('.esrc'); var code=ed.querySelector('.ecode code');
-    if(src&&code){ var raw=src.textContent.replace(/^\n/,'').replace(/\s+$/,''); code.innerHTML=hl(raw);
+    var code=ed.querySelector('.ecode code');
+    if(code){ var raw=code.textContent.replace(/^\n/,'').replace(/\s+$/,''); code.innerHTML=hl(raw);
       var btn=ed.querySelector('.ecopy');
       if(btn) btn.addEventListener('click',function(){
         var done=function(){ btn.textContent='copied'; setTimeout(function(){ btn.textContent='copy'; },1400); };
