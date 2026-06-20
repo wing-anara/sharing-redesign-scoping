@@ -854,9 +854,48 @@ await db.transaction(async (tx) =&gt; {
       </div>
     </div>
 
+    <div class="spacer lg"></div>
+    <h3 class="reveal" style="margin-bottom:10px;">The API surface — Permix-style, entity-agnostic</h3>
+    <p class="lead-in reveal" style="margin-bottom:14px;">The façade app code actually calls should be a typed <code>check(entity, action)</code> — the <a href="https://permix.letstri.dev/" target="_blank" rel="noopener">Permix</a> shape. But Permix is a <em>stateless rules layer</em> (it stores nothing and has no <code>listObjects</code>); it's the <strong>front door, not the engine</strong>. The win is to keep that ergonomic, entity-agnostic API and back its rules with the ReBAC resolver — Permix's rules are predicates, which is exactly the seam.</p>
+    <figure class="editor reveal">
+      <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/authz/facade.ts</span><button class="ecopy" type="button">copy</button></figcaption>
+      <pre class="ecode"><code>import { createPermix } from 'permix'        // or a thin in-house equivalent
+import { authz, doc, space, note, user } from './authz'
+
+// entity-agnostic: add a future entity by adding a key — no engine changes
+const permix = createPermix&lt;{
+  doc:   { action: 'read' | 'write' | 'share' | 'delete' }
+  space: { action: 'view' | 'manage' }
+  note:  { action: 'read' | 'write' }        // future entity, same machinery
+}&gt;()
+
+// Permix is the API; the ReBAC tuple graph is the source of truth.
+// each rule is a predicate → it just calls the resolver.
+export const permixFor = (me: Subject) =&gt; permix.setup({
+  doc: {
+    read:   (d) =&gt; authz.check({ object: doc(d.id),  relation: 'viewer', subject: me }),
+    write:  (d) =&gt; authz.check({ object: doc(d.id),  relation: 'editor', subject: me }),
+    share:  (d) =&gt; authz.check({ object: doc(d.id),  relation: 'owner',  subject: me }),
+    delete: (d) =&gt; authz.check({ object: doc(d.id),  relation: 'owner',  subject: me }),
+  },
+  space: {
+    view:   (s) =&gt; authz.check({ object: space(s.id), relation: 'viewer', subject: me }),
+    manage: (s) =&gt; authz.check({ object: space(s.id), relation: 'owner',  subject: me }),
+  },
+})
+
+// app code stays clean and fully typed — and the model underneath is ReBAC
+if (await permix.check('doc.write', myDoc)) { /* ... */ }</code></pre>
+    </figure>
+    <div class="spacer"></div>
+    <div class="callout reveal">
+      <p style="margin:0 0 10px;"><strong>The one thing to verify in a spike:</strong> Permix is built around <em>synchronous, setup-time</em> rules; the ReBAC resolver is <em>async, per-object</em> (it traverses the graph). Confirm Permix's async/dynamic-rule support fits — or wrap the same <code>check(entity, action)</code> shape in-house over <code>authz</code>. Either way the rule: <strong>Permix-style is the façade; tuples stay the source of truth.</strong></p>
+      <p class="dim" style="margin:0;">Don't let "use Permix" become "compute permissions from roles" — that loses one-write shares, <code>listObjects</code>, cross-org, and the no-denormalization win this whole design is for.</p>
+    </div>
+
     <div class="spacer"></div>
     <div class="callout good reveal">
-      <p style="margin:0;"><strong>The shape:</strong> one normalized tuple table, a typed schema, and a thin runtime — bounded traversal, reverse-index listing, transaction support, cache hooks, and <code>explain()</code>. Not a massive auth service: a typed, app-embedded Zanzibar-lite that makes the tuple model feel native to Drizzle.</p>
+      <p style="margin:0;"><strong>The shape:</strong> one normalized tuple table, a typed schema, a thin runtime, and a Permix-style typed façade — bounded traversal, reverse-index listing, transaction support, cache hooks, and <code>explain()</code>. Not a massive auth service: a typed, app-embedded Zanzibar-lite that makes the tuple model feel native to Drizzle.</p>
     </div>
   </div>
 </section>
