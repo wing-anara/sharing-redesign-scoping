@@ -741,13 +741,14 @@ export async function listViewableDocs(db: DB, org: string, userId: string) {
     </div>
 
     <div class="spacer"></div>
-    <h3 class="reveal" style="margin-bottom:14px;">The schema is the §03 rewrites, typed</h3>
+    <h3 class="reveal" style="margin-bottom:10px;">One definition → the typed client, generated for you</h3>
+    <p class="lead-in reveal" style="margin-bottom:14px;">This is the Permix move worth copying: you write the model <em>once</em>, and the entity helpers, the per-entity relation names, the <code>grant/check/listObjects</code> signatures, and the permission aliases are all <strong>inferred</strong> from it — autocomplete and compile errors, nothing restated.</p>
     <figure class="editor reveal">
       <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/authz/schema.ts</span><button class="ecopy" type="button">copy</button></figcaption>
-      <pre class="ecode"><code>import { defineAuthzSchema, self, direct, union, computed, tupleToUserset } from '@acme/rebac'
+      <pre class="ecode"><code>import { defineSchema, self, direct, union, computed, tupleToUserset } from '@acme/rebac'
 
-// the userset rewrites from §03 — now a typed, validated schema
-export const authzSchema = defineAuthzSchema({
+// ── define the model ONCE: entities, relations, rewrites, permission aliases ──
+export const schema = defineSchema({
   user: {},
 
   space: {
@@ -764,37 +765,41 @@ export const authzSchema = defineAuthzSchema({
       editor: union(self(), computed('owner'),  tupleToUserset('parent', 'member')),
       viewer: union(self(), computed('editor'), tupleToUserset('parent', 'viewer')),
     },
-    // operation → relation aliases, so app code asks for read/write, not relations
+    // operation → relation aliases, so app code asks read/write, not relations
     permissions: { read: 'viewer', write: 'editor', share: 'owner', delete: 'owner' },
   },
-})</code></pre>
+})
+
+// ── the Permix move: the rest is INFERRED from `schema`, nothing restated ──
+export type Entity  = EntityOf&lt;typeof schema&gt;             // 'user' | 'space' | 'doc'
+export type DocRel  = RelationOf&lt;typeof schema, 'doc'&gt;    // 'parent' | 'owner' | 'editor' | 'viewer'
+export type DocPerm = PermissionOf&lt;typeof schema, 'doc'&gt;  // 'read' | 'write' | 'share' | 'delete'</code></pre>
     </figure>
 
     <div class="spacer"></div>
-    <h3 class="reveal" style="margin-bottom:14px;">The runtime — typed, validated, ergonomic</h3>
+    <h3 class="reveal" style="margin-bottom:14px;">The client is generated from the schema</h3>
     <figure class="editor reveal">
       <figcaption class="ebar"><span class="dots"><i></i><i></i><i></i></span><span class="efile">packages/authz/index.ts</span><button class="ecopy" type="button">copy</button></figcaption>
-      <pre class="ecode"><code>import { createAuthz, user, doc, space } from '@acme/rebac'
+      <pre class="ecode"><code>import { createAuthz } from '@acme/rebac'
 import { db } from '../db'
 import { relationTuple } from './schema/relation-tuple'
-import { authzSchema } from './schema'
+import { schema } from './schema'
 
-export const authz = createAuthz({ db, schema: authzSchema, tables: { relationTuple }, maxDepth: 8 })
+// createAuthz infers the whole typed surface FROM `schema` — like createPermix&lt;T&gt;().
+// the entity helpers (doc, space, user) are generated from the schema's entity keys.
+export const { authz, doc, space, user } = createAuthz({ db, schema, tables: { relationTuple }, maxDepth: 8 })
 
-// grant / revoke — one tuple each, no subtree fan-out
-await authz.grant({ object: doc(id), relation: 'viewer', subject: user('sam') })
-await authz.revoke({ object: doc(id), relation: 'viewer', subject: user('sam') })
+// grant / check — `relation` autocompletes to the entity's relations (inferred)
+await authz.grant({ object: doc(id), relation: 'viewer', subject: user('sam') })  // one tuple
+await authz.check({ object: doc(id), relation: 'editor', subject: user('sam') })  // =&gt; boolean
 
-// check / assert — `relation` is constrained to doc's relations at compile time
-await authz.check({ object: doc(id), relation: 'viewer', subject: user('sam') })  // =&gt; boolean
-await authz.assert({ object: doc(id), relation: 'editor', subject: user('sam') }) // throws ForbiddenError
-
-// permission aliases for app code — read maps to viewer, write to editor
+// permission aliases (also inferred): app asks read/write, never raw relations
 await authz.can(user(uid), 'read',  doc(id))
 await authz.can(user(uid), 'write', doc(id))
 
-// ❌ compile error: 'member' is not a relation of `doc`
-await authz.check({ object: doc(id), relation: 'member', subject: user('sam') })</code></pre>
+// ❌ compile errors — caught by the inferred types, no runtime check needed:
+await authz.check({ object: doc(id), relation: 'member', subject: user('sam') }) // 'member' ∉ doc
+await authz.grant({ object: doc(id), relation: 'parent', subject: user('sam') }) // parent expects a space</code></pre>
     </figure>
 
     <div class="spacer"></div>
