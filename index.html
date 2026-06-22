@@ -1017,6 +1017,7 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
 
     <div class="spacer"></div>
     <p class="kicker reveal">Correctness · old vs new, over real workspaces</p>
+    <p class="sub reveal">One <em>comparison</em> = one member, one document, one action (read or write): do the old system and the new system return the same yes/no? A <em>divergence</em> is any disagreement; an <em>over-grant</em> is the risky kind — new says <span style="color:var(--accent-2)">yes</span> where old says <span style="color:var(--danger)">no</span>.</p>
     <div class="ctable reveal">
       <div class="crow head">
         <div>Sample</div><div>Scale</div><div>Old-vs-new comparisons</div><div>Result</div>
@@ -1043,7 +1044,10 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
 
     <div class="spacer"></div>
     <div class="callout reveal">
-      <p style="margin:0;"><strong>The 2 over-grants — root-caused, and they're the §08 Case B tradeoff, not a bug.</strong> Both are a single private document carrying a malformed ACL row whose <code>organizationId</code> equals the <em>userId</em> (a load-test artifact), not the resource's org. Legacy keys a direct grant on <code>activeOrgId === row.organizationId</code>, so a member acting in the resource org never matches it → <span class="no">deny</span>. The backfill scopes share tuples to the <em>resource's</em> tenant (Case B), so the grant lands there → <span class="ok">allow</span>. That's the resource-centric model being deliberately broader than legacy's active-org gate — a cross-org grant reaches the grantee regardless of which workspace they're acting in. <strong>The decision to make:</strong> keep resource-centric (the doc's intent — external guests get exactly their explicit grants) or mirror legacy's active-org keying. Either way the verifier's <code>over-grant</code> non-zero exit caught it on the first run.</p>
+      <p style="margin:0 0 12px;"><strong>What those 2 differences actually were.</strong> Both are the <em>same single document</em> — a private file one person had been given direct access to. In this load-test workspace its saved permission was tagged to the wrong place: the person's own user id instead of a workspace (a quirk of the synthetic data).</p>
+      <p style="margin:0 0 8px;"><strong style="color:var(--danger)">Old system →</strong> only honors a direct grant when you're working <em>inside the exact workspace the grant was tagged to</em>. The tag didn't match, so it answered <span style="color:var(--danger)">no access</span>.</p>
+      <p style="margin:0 0 12px;"><strong style="color:var(--accent-2)">New system →</strong> attaches the grant to the <em>document's own workspace</em>, so it answered <span style="color:var(--accent-2)">access</span>.</p>
+      <p style="margin:0;">That's a deliberate design choice, not a defect: in the new model a grant <em>follows the document</em>, so someone you share with reaches it no matter which workspace they're currently in — the cross-org sharing in §08. We flagged it so we can confirm that's the behavior we want. The other <strong>26,998</strong> checks were identical.</p>
     </div>
 
     <div class="spacer lg"></div>
