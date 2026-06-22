@@ -1109,8 +1109,8 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
 
       <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
         <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · inherited</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">5-deep folder chain</div></div>
-        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:93.8%; background:var(--amber); border-radius:7px;"></div></div>
-        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--amber); font-weight:600;">30</span><span style="color:var(--txt-faint);"> · ~6/lvl</span></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:93.8%; background:var(--accent-2); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--accent-2); font-weight:600;">30</span><span style="color:var(--txt-faint);"> · ~6/lvl</span></div>
       </div>
 
       <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
@@ -1120,7 +1120,7 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
       </div>
 
     </div>
-    <p class="cap-note reveal" style="margin-top:10px;">Every permission <em>check</em> is a handful of indexed lookups (<span style="color:var(--accent-2)">green</span>), short-circuited and bounded. Only <span style="color:var(--amber)">listObjects</span> scales with the result — batch it before listing at scale.</p>
+    <p class="cap-note reveal" style="margin-top:10px;">Every permission <em>check</em> (<span style="color:var(--accent-2)">green</span>) is bounded and short-circuits — the same order as today's read, even a deep folder walk, and it caches to 0. The one thing costlier than today is <span style="color:var(--amber)">listObjects</span>: today that's a single denormalized query, here it's ~1 lookup per visible doc — the read-side trade for one-row writes (§06). Batch it before listing at scale.</p>
 
     <div class="spacer lg"></div>
     <p class="kicker reveal">Throughput</p>
