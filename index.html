@@ -273,6 +273,7 @@
       <a href="#framework">Framework</a>
       <a href="#anara">Anara</a>
       <a href="#priorart">Prior art</a>
+      <a href="#validation">Validation</a>
     </nav>
   </div>
 </header>
@@ -1002,6 +1003,77 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
     <div class="spacer"></div>
     <div class="callout reveal">
       <p style="margin:0;"><strong>Invariant across all of them:</strong> persist relationships, derive permissions at read time with caching — never materialize per-object ACLs. Materialization is precisely the write-amplification and drift problem ReBAC exists to remove.</p>
+    </div>
+  </div>
+</section>
+
+<section id="validation">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="n">10</span> / Validation</p>
+    <h2 class="reveal">Built, tested, benchmarked</h2>
+    <p class="sub reveal">The design above is implemented as <code>@anara/authz</code>, the table is live, and it ran against real production-shaped workspaces behind a per-org flag (default off). Here's what held up.</p>
+
+    <p class="lead-in reveal">Shipped: the single <code>RelationTuple</code> table, the typed engine (userset rewrites, bounded traversal, reverse-index <code>listObjects</code>, caching), the Anara model reproducing <code>access.ts</code> one-to-one, and a rollout gate that swaps the engine per workspace — <code>off</code> (legacy) → <code>shadow</code> (run both, return legacy, log divergences) → <code>on</code> (tuples decide, legacy is the fail-safe fallback). Backing it: 145 unit tests, an independent re-implementation of <code>access.ts</code> as a parity oracle, and an offline verifier that diffs old-vs-new decisions over real data.</p>
+
+    <div class="spacer"></div>
+    <p class="kicker reveal">Correctness · old vs new, over real workspaces</p>
+    <div class="ctable reveal">
+      <div class="crow head">
+        <div>Sample</div><div>Scale</div><div>Old-vs-new comparisons</div><div>Result</div>
+      </div>
+      <div class="crow">
+        <div class="op">1 workspace · 3 members</div>
+        <div class="cost">~10k docs · 10k ACL rows</div>
+        <div class="cost">9,000</div>
+        <div><span class="vpill trade">2 over-grants</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">6 workspaces · single-member</div>
+        <div class="cost">2.5k–5k docs each</div>
+        <div class="cost">18,000</div>
+        <div><span class="vpill win">0 divergences</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Total</div>
+        <div class="cost">7 workspaces · 36.9k docs · 45k tuples</div>
+        <div class="cost">27,000</div>
+        <div><span class="vpill win">26,998 identical</span></div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="callout reveal">
+      <p style="margin:0;"><strong>The 2 over-grants — root-caused, and they're the §08 Case B tradeoff, not a bug.</strong> Both are a single private document carrying a malformed ACL row whose <code>organizationId</code> equals the <em>userId</em> (a load-test artifact), not the resource's org. Legacy keys a direct grant on <code>activeOrgId === row.organizationId</code>, so a member acting in the resource org never matches it → <span class="no">deny</span>. The backfill scopes share tuples to the <em>resource's</em> tenant (Case B), so the grant lands there → <span class="ok">allow</span>. That's the resource-centric model being deliberately broader than legacy's active-org gate — a cross-org grant reaches the grantee regardless of which workspace they're acting in. <strong>The decision to make:</strong> keep resource-centric (the doc's intent — external guests get exactly their explicit grants) or mirror legacy's active-org keying. Either way the verifier's <code>over-grant</code> non-zero exit caught it on the first run.</p>
+    </div>
+
+    <div class="spacer lg"></div>
+    <p class="kicker reveal">Benchmarks · store reads per operation (≈ DB round-trips)</p>
+    <div class="ctable reveal">
+      <div class="crow head">
+        <div>Operation</div><div>Store reads</div><div>What it is</div><div></div>
+      </div>
+      <div class="crow"><div class="op">check · read, direct share</div><div class="cost new">1</div><div class="cost">one indexed point lookup</div><div><span class="vpill win">O(1)</span></div></div>
+      <div class="crow"><div class="op">check · write, direct owner</div><div class="cost new">3</div><div class="cost">self ∪ owner</div><div><span class="vpill win">O(1)</span></div></div>
+      <div class="crow"><div class="op">check · team doc</div><div class="cost new">5</div><div class="cost">expands the <code>org#member</code> userset</div><div><span class="vpill win">O(1)</span></div></div>
+      <div class="crow"><div class="op">check · inherited via folders</div><div class="cost new">~6 / level</div><div class="cost">30 reads at a 5-deep chain</div><div><span class="vpill tie">O(depth)</span></div></div>
+      <div class="crow"><div class="op">check · denied (no path)</div><div class="cost new">10</div><div class="cost">explores all branches, bounded</div><div><span class="vpill win">bounded</span></div></div>
+      <div class="crow"><div class="op">listObjects · viewable docs</div><div class="cost new">32</div><div class="cost">≈1 reverse query per visible doc</div><div><span class="vpill trade">O(result)</span></div></div>
+      <div class="crow"><div class="op">check · cache hit</div><div class="cost new">0</div><div class="cost">served from cache</div><div><span class="vpill win">free</span></div></div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="apinote reveal">
+      <b>CPU (in-memory, no IO):</b> ~380k team-doc checks/s · ~104k deep-inherited checks/s · <b>2.6M/s</b> on a cache hit.<br/>
+      <b>Backfill:</b> 36.9k docs → 45k tuples in ~44s (~840 docs/s); fan-out copies collapse — a 10k-doc workspace with 10k ACL rows yields ~10.4k tuples.<br/>
+      <b>Live:</b> ran the app in dev with the engine <code>on</code> for the 10k-doc workspace, impersonated a member, opened documents — served by the resolver, no 403s, no fallback errors.
+    </div>
+
+    <div class="spacer lg"></div>
+    <div class="feat reveal">
+      <div class="f"><h4>Tenancy is a real decision</h4><p>Resource-centric vs legacy's active-org keying diverge exactly when an ACL row's org ≠ the resource's org (cross-org shares). The only correctness gap found — and it's a product call, not a defect.</p></div>
+      <div class="f"><h4>listObjects scales with the result</h4><p>The reverse expansion issues ≈1 indexed query per object the subject can see — fine for <code>check()</code>, but a full unsampled listing of a 10k-doc workspace is slow over a remote DB. Batch the reverse lookups before listing at scale.</p></div>
+      <div class="f"><h4>Fails closed</h4><p>Depth, tuple-budget and timeout guardrails throw rather than silently allow; containment cycles are cut on the path; a cache hit is 0 reads.</p></div>
+      <div class="f"><h4>Reviewed adversarially</h4><p>Engine + migration went through repeated opposing-model review; every finding (tenant scoping, stale private-owner tuples, fan-out dedup, fail-safe fallback, list/check depth parity) was fixed with a test.</p></div>
     </div>
   </div>
 </section>
