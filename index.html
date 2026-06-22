@@ -1017,38 +1017,61 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
 
     <div class="spacer"></div>
     <p class="kicker reveal">Correctness · old vs new, over real workspaces</p>
-    <p class="sub reveal">One <em>comparison</em> = one member, one document, one action (read or write): do the old system and the new system return the same yes/no? A <em>divergence</em> is any disagreement; an <em>over-grant</em> is the risky kind — new says <span style="color:var(--accent-2)">yes</span> where old says <span style="color:var(--danger)">no</span>.</p>
-    <div class="ctable reveal">
-      <div class="crow head">
-        <div>Sample</div><div>Scale</div><div>Old-vs-new comparisons</div><div>Result</div>
+
+    <div class="reveal" style="margin:6px 0 26px;">
+      <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+        <span style="font-family:var(--disp); font-size:clamp(36px,6vw,52px); font-weight:600; color:var(--accent-2); line-height:1;">99.99%</span>
+        <span style="color:var(--txt-dim); font-size:14px;">of <b style="color:var(--txt)">27,000</b> real access checks: the new model answered exactly like today's</span>
       </div>
-      <div class="crow">
-        <div class="op">1 workspace · 3 members</div>
-        <div class="cost">~10k docs · 10k ACL rows</div>
-        <div class="cost">9,000</div>
-        <div><span class="vpill trade">2 over-grants</span></div>
+      <div style="height:18px; border-radius:10px; overflow:hidden; background:var(--panel-2); border:1px solid var(--line); display:flex; margin-top:16px;">
+        <div style="flex:1 1 auto; background:var(--accent-2);"></div>
+        <div style="flex:0 0 5px; background:var(--amber);"></div>
       </div>
-      <div class="crow">
-        <div class="op">6 workspaces · single-member</div>
-        <div class="cost">2.5k–5k docs each</div>
-        <div class="cost">18,000</div>
-        <div><span class="vpill win">0 divergences</span></div>
-      </div>
-      <div class="crow">
-        <div class="op">Total</div>
-        <div class="cost">7 workspaces · 36.9k docs · 45k tuples</div>
-        <div class="cost">27,000</div>
-        <div><span class="vpill win">26,998 identical</span></div>
+      <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:12px; margin-top:7px;">
+        <span style="color:var(--accent-2);">26,998 identical</span>
+        <span style="color:var(--amber);">2 differ ▸</span>
       </div>
     </div>
 
-    <div class="spacer"></div>
-    <div class="callout reveal">
-      <p style="margin:0 0 12px;"><strong>What those 2 differences actually were.</strong> Both are the <em>same single document</em> — a private file one person had been given direct access to. In this load-test workspace its saved permission was tagged to the wrong place: the person's own user id instead of a workspace (a quirk of the synthetic data).</p>
-      <p style="margin:0 0 8px;"><strong style="color:var(--danger)">Old system →</strong> only honors a direct grant when you're working <em>inside the exact workspace the grant was tagged to</em>. The tag didn't match, so it answered <span style="color:var(--danger)">no access</span>.</p>
-      <p style="margin:0 0 12px;"><strong style="color:var(--accent-2)">New system →</strong> attaches the grant to the <em>document's own workspace</em>, so it answered <span style="color:var(--accent-2)">access</span>.</p>
-      <p style="margin:0;">That's a deliberate design choice, not a defect: in the new model a grant <em>follows the document</em>, so someone you share with reaches it no matter which workspace they're currently in — the cross-org sharing in §08. We flagged it so we can confirm that's the behavior we want. The other <strong>26,998</strong> checks were identical.</p>
+    <div class="ctable reveal">
+      <div class="crow head">
+        <div>Workspaces tested</div><div>Scale</div><div>Checks</div><div>Result</div>
+      </div>
+      <div class="crow">
+        <div class="op">6 · single-member</div>
+        <div class="cost">2.5k–5k docs each</div>
+        <div class="cost">18,000</div>
+        <div><span class="vpill win">✓ all match</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">1 · 3 members</div>
+        <div class="cost">~10k docs · 10k shares</div>
+        <div class="cost">9,000</div>
+        <div><span class="vpill trade">2 differ ▸</span></div>
+      </div>
+      <div class="crow">
+        <div class="op">Total · 7 workspaces</div>
+        <div class="cost">36.9k docs · 45k tuples</div>
+        <div class="cost">27,000</div>
+        <div><span class="vpill win">26,998 / 27,000</span></div>
+      </div>
     </div>
+
+    <div class="spacer lg"></div>
+    <p class="kicker reveal">The 2 that differ ▸ one private document, decided two ways</p>
+    <div class="race reveal" style="margin-top:6px;">
+      <div class="lane old">
+        <h4>OLD · access.ts</h4>
+        <div class="cap">share was tagged to a workspace that didn't match</div>
+        <div class="outcome deny" style="font-size:16px;">✕&nbsp;&nbsp;denied</div>
+      </div>
+      <div class="lane new">
+        <h4>NEW · tuples</h4>
+        <div class="cap">share follows the document itself</div>
+        <div class="outcome allow" style="font-size:16px;">✓&nbsp;&nbsp;allowed</div>
+      </div>
+    </div>
+    <p class="cap-note reveal" style="margin-top:14px;">Same document, both read + write. The new model lets a share <em>follow the document</em> (§08) instead of the workspace you're in — surfaced here by a test-data quirk, and a design choice to confirm, not a bug.</p>
 
     <div class="spacer lg"></div>
     <p class="kicker reveal">Benchmarks · store reads per operation (≈ DB round-trips)</p>
