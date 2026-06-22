@@ -1074,26 +1074,62 @@ Check[tenant=acme](doc:report, viewer, user:bob)   <span class="c">// a workspac
     <p class="cap-note reveal" style="margin-top:14px;">Same document, both read + write. The new model lets a share <em>follow the document</em> (§08) instead of the workspace you're in — surfaced here by a test-data quirk, and a design choice to confirm, not a bug.</p>
 
     <div class="spacer lg"></div>
-    <p class="kicker reveal">Benchmarks · store reads per operation (≈ DB round-trips)</p>
-    <div class="ctable reveal">
-      <div class="crow head">
-        <div>Operation</div><div>Store reads</div><div>What it is</div><div></div>
-      </div>
-      <div class="crow"><div class="op">check · read, direct share</div><div class="cost new">1</div><div class="cost">one indexed point lookup</div><div><span class="vpill win">O(1)</span></div></div>
-      <div class="crow"><div class="op">check · write, direct owner</div><div class="cost new">3</div><div class="cost">self ∪ owner</div><div><span class="vpill win">O(1)</span></div></div>
-      <div class="crow"><div class="op">check · team doc</div><div class="cost new">5</div><div class="cost">expands the <code>org#member</code> userset</div><div><span class="vpill win">O(1)</span></div></div>
-      <div class="crow"><div class="op">check · inherited via folders</div><div class="cost new">~6 / level</div><div class="cost">30 reads at a 5-deep chain</div><div><span class="vpill tie">O(depth)</span></div></div>
-      <div class="crow"><div class="op">check · denied (no path)</div><div class="cost new">10</div><div class="cost">explores all branches, bounded</div><div><span class="vpill win">bounded</span></div></div>
-      <div class="crow"><div class="op">listObjects · viewable docs</div><div class="cost new">32</div><div class="cost">≈1 reverse query per visible doc</div><div><span class="vpill trade">O(result)</span></div></div>
-      <div class="crow"><div class="op">check · cache hit</div><div class="cost new">0</div><div class="cost">served from cache</div><div><span class="vpill win">free</span></div></div>
-    </div>
+    <p class="kicker reveal">Benchmarks · store reads per permission check <span style="color:var(--txt-faint)">(each ≈ one DB lookup)</span></p>
+    <div class="reveal" style="background:linear-gradient(180deg,rgba(22,22,28,.6),rgba(18,18,23,.6)); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; display:flex; flex-direction:column; gap:14px;">
 
-    <div class="spacer"></div>
-    <div class="apinote reveal">
-      <b>CPU (in-memory, no IO):</b> ~380k team-doc checks/s · ~104k deep-inherited checks/s · <b>2.6M/s</b> on a cache hit.<br/>
-      <b>Backfill:</b> 36.9k docs → 45k tuples in ~44s (~840 docs/s); fan-out copies collapse — a 10k-doc workspace with 10k ACL rows yields ~10.4k tuples.<br/>
-      <b>Live:</b> ran the app in dev with the engine <code>on</code> for the 10k-doc workspace, impersonated a member, opened documents — served by the resolver, no 403s, no fallback errors.
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · cache hit</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">served from cache</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--accent-2); font-weight:600;">0</span><span style="color:var(--txt-faint);"> · free</span></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · read</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">direct share</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:3.1%; min-width:5px; background:var(--accent-2); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--accent-2); font-weight:600;">1</span><span style="color:var(--txt-faint);"> · O(1)</span></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · write</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">direct owner</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:9.4%; background:var(--accent-2); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--accent-2); font-weight:600;">3</span><span style="color:var(--txt-faint);"> · O(1)</span></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · team doc</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">org#member userset</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:15.6%; background:var(--accent-2); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--accent-2); font-weight:600;">5</span><span style="color:var(--txt-faint);"> · O(1)</span></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · denied</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">all branches, bounded</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:31.3%; background:var(--accent-2); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--accent-2); font-weight:600;">10</span><span style="color:var(--txt-faint);"> · bounded</span></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">check · inherited</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">5-deep folder chain</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:93.8%; background:var(--amber); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--amber); font-weight:600;">30</span><span style="color:var(--txt-faint);"> · ~6/lvl</span></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:200px 1fr 118px; gap:16px; align-items:center;">
+        <div><div style="font-family:var(--mono); font-size:12.5px; color:#fff;">listObjects</div><div style="font-family:var(--mono); font-size:10.5px; color:var(--txt-faint);">≈1 query / visible doc</div></div>
+        <div style="height:14px; border-radius:7px; background:var(--panel-2);"><div style="height:100%; width:100%; background:var(--amber); border-radius:7px;"></div></div>
+        <div style="font-family:var(--mono); font-size:12px;"><span style="color:var(--amber); font-weight:600;">32</span><span style="color:var(--txt-faint);"> · O(result)</span></div>
+      </div>
+
     </div>
+    <p class="cap-note reveal" style="margin-top:10px;">Every permission <em>check</em> is a handful of indexed lookups (<span style="color:var(--accent-2)">green</span>), short-circuited and bounded. Only <span style="color:var(--amber)">listObjects</span> scales with the result — batch it before listing at scale.</p>
+
+    <div class="spacer lg"></div>
+    <p class="kicker reveal">Throughput</p>
+    <div class="feat reveal" style="grid-template-columns:repeat(3,1fr);">
+      <div class="f"><h4 style="font-size:26px; color:var(--accent-2); margin:0 0 2px;">2.6M<span style="font-size:13px; color:var(--txt-faint);">/s</span></h4><p>cached checks (0 reads)</p></div>
+      <div class="f"><h4 style="font-size:26px; color:var(--accent-2); margin:0 0 2px;">380k<span style="font-size:13px; color:var(--txt-faint);">/s</span></h4><p>uncached team-doc checks</p></div>
+      <div class="f"><h4 style="font-size:26px; color:var(--accent-2); margin:0 0 2px;">~840<span style="font-size:13px; color:var(--txt-faint);"> docs/s</span></h4><p>backfill — 36.9k docs → 45k tuples in ~44s</p></div>
+    </div>
+    <p class="cap-note reveal" style="margin-top:12px;"><b style="color:var(--accent-2)">Live:</b> ran the app in dev with the engine <code>on</code> for the 10k-doc workspace, impersonated a member, opened documents — served by the resolver, no 403s, no fallback errors.</p>
 
     <div class="spacer lg"></div>
     <div class="feat reveal">
